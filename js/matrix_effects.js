@@ -1,15 +1,12 @@
 /**
- * ITB INFRASTRUCTURE ANALYZER - FINAL VERSION
- * Features: Dual-turn logic, interactive policies, and goal tracking.
+ * ITB INFRASTRUCTURE ANALYZER - REVERTED VERSION
+ * Values: 627 PCs | 1600 Pax | 12h Duty Cycle
  */
 
 const INFRA_DATA = {
-    electricity: { variationRate: 0.2281 }, // Forecast increment
-    water: { fixedDailyPerPax: 133 },       // Liters per student use
-    costs: {
-        cleaning: 175,
-        supplies: 91.25
-    }
+    electricity: { variationRate: 0.2281 },
+    water: { fixedDailyPerPax: 133 },
+    costs: { cleaning: 175, supplies: 91.25 }
 };
 
 const PC_WATTAGE = 200;
@@ -22,84 +19,42 @@ function runCalculations() {
     const selectedDays = parseInt(document.getElementById('calcMode').value);
     const grid = document.getElementById('resultsGrid');
 
-    // 1. CALCULAR AHORRO SEGÚN POLÍTICAS SELECCIONADAS
-    let totalSavingsPercent = 0;
-    document.querySelectorAll('.policy-check:checked').forEach(check => {
-        totalSavingsPercent += parseInt(check.dataset.impact);
-    });
-    const reductionMultiplier = (100 - totalSavingsPercent) / 100;
+    // 1. Calculations
+    const totalWater = occupancy * INFRA_DATA.water.fixedDailyPerPax * selectedDays;
+    const activeKwh = (pcCount * PC_WATTAGE * 12 * selectedDays) / 1000;
+    let standbyDays = (selectedDays === 365) ? 0 : (365 - selectedDays);
+    const standbyKwh = (pcCount * STANDBY_WATTAGE * 24 * standbyDays) / 1000;
+    const totalEnergy = activeKwh + standbyKwh;
+    const expenseFactor = (selectedDays === 175) ? 3 : 12;
+    const resourceIndex = pcCount > 0 ? (totalWater / pcCount).toFixed(0) : 0;
 
-    // 2. CÁLCULOS BASE (SIN AHORRO) PARA EL OBJETIVO (GOAL)
-    const baseWater = occupancy * INFRA_DATA.water.fixedDailyPerPax * selectedDays;
-    const baseEnergy = ((pcCount * PC_WATTAGE * 12 * selectedDays) / 1000) +
-                       ((pcCount * STANDBY_WATTAGE * 24 * (selectedDays === 365 ? 0 : 365-selectedDays)) / 1000);
-    const baseExpenseFactor = (selectedDays === 175) ? 3 : 12;
-
-    // 3. CÁLCULOS ACTUALES (APLICANDO LAS POLÍTICAS DE AHORRO)
-    const currentWater = baseWater * reductionMultiplier;
-    const currentEnergy = baseEnergy * reductionMultiplier;
-    const currentCleaning = (INFRA_DATA.costs.cleaning * baseExpenseFactor) * reductionMultiplier;
-    const currentSupplies = (INFRA_DATA.costs.supplies * baseExpenseFactor) * reductionMultiplier;
-
-    // Definición de métricas para mostrar
     const metrics = [
-        {
-            title: "Facility Water",
-            current: currentWater,
-            goal: baseWater * 0.70,
-            unit: "L", icon: "💧"
-        },
-        {
-            title: "Energy Load",
-            current: currentEnergy,
-            goal: baseEnergy * 0.70,
-            unit: "kWh", icon: "🖥️"
-        },
-        {
-            title: "Carbon Footprint",
-            current: currentEnergy * CO2_FACTOR,
-            goal: (baseEnergy * 0.70) * CO2_FACTOR,
-            unit: "kg", icon: "🌍"
-        },
-        {
-            title: "Resource Load Index",
-            current: pcCount > 0 ? (currentWater / pcCount) : 0,
-            goal: pcCount > 0 ? (baseWater * 0.70 / pcCount) : 0,
-            unit: "L/Node", icon: "📊"
-        },
-        {
-            title: "2026 Forecast",
-            current: currentEnergy * (1 + INFRA_DATA.electricity.variationRate),
-            goal: (baseEnergy * 0.70) * (1 + INFRA_DATA.electricity.variationRate),
-            unit: "kWh", icon: "📈"
-        },
-        {
-            title: "Maintenance Total",
-            current: currentCleaning + currentSupplies,
-            goal: (currentCleaning + currentSupplies) / reductionMultiplier * 0.70,
-            unit: "€", icon: "🛠️"
-        }
+        { title: "Facility Water", val: totalWater, unit: "L", icon: "💧" },
+        { title: "System Energy Load", val: totalEnergy.toFixed(0), unit: "kWh", icon: "🖥️" },
+        { title: "Carbon Footprint", val: (totalEnergy * CO2_FACTOR).toFixed(1), unit: "kg", icon: "🌍" },
+        { title: "Standby Leakage", val: standbyKwh.toFixed(1), unit: "kWh", icon: "🔌" },
+        { title: "Resource Load Index", val: resourceIndex, unit: "L/Node", icon: "📊" },
+        { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expenseFactor).toFixed(2), unit: "€", icon: "🛠️" },
+        { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expenseFactor).toFixed(2), unit: "€", icon: "📦" },
+        { title: "2026 Forecast", val: (totalEnergy * (1 + INFRA_DATA.electricity.variationRate)).toFixed(0), unit: "kWh", icon: "📈" }
     ];
 
-    // Renderizar tarjetas
     grid.innerHTML = "";
     metrics.forEach(m => {
-        const isAcheived = m.current <= m.goal;
+        let targetVal = (parseFloat(m.val) * 0.70).toFixed(m.val.toString().includes('.') ? 1 : 0);
 
         grid.innerHTML += `
             <div class="card">
                 <h3>${m.icon} ${m.title}</h3>
                 <div class="data-container">
                     <div class="current-row">
-                        <span class="label">Current (with Policies):</span>
-                        <span class="data" style="color: ${totalSavingsPercent > 0 ? '#3498db' : '#fff'}">
-                            ${parseFloat(m.current.toFixed(m.unit === "L" ? 0 : 1)).toLocaleString()}
-                        </span>
+                        <span class="label">Actual:</span>
+                        <span class="data">${parseFloat(m.val).toLocaleString()}</span>
                         <span class="unit">${m.unit}</span>
                     </div>
-                    <div class="target-row" style="color: ${isAcheived ? '#22c55e' : '#e67e22'}; margin-top: 12px; border-top: 1px dashed #555; padding-top: 8px;">
-                        <span class="label">${isAcheived ? '✅ Goal Achieved' : 'Strategic Goal (-30%):'}</span>
-                        <span class="data-target">${parseFloat(m.goal.toFixed(m.unit === "L" ? 0 : 1)).toLocaleString()}</span>
+                    <div class="target-row" style="display:none; color: #22c55e; margin-top: 12px; border-top: 1px dashed #555; padding-top: 8px; font-weight: bold;">
+                        <span class="label">Goal (-30%):</span>
+                        <span class="data-target">${parseFloat(targetVal).toLocaleString()}</span>
                         <span class="unit">${m.unit}</span>
                     </div>
                 </div>
@@ -108,10 +63,21 @@ function runCalculations() {
     });
 }
 
-// Función para imprimir reporte
+function applySustainabilityPlan() {
+    const targets = document.querySelectorAll('.target-row');
+    if (targets.length === 0) return;
+
+    targets.forEach(el => {
+        el.style.display = "block";
+    });
+
+    document.querySelectorAll('.current-row').forEach(el => {
+        el.style.opacity = "0.5";
+    });
+}
+
 function exportToPDF() {
     window.print();
 }
 
-// Inicialización automática al cargar
 window.onload = runCalculations;

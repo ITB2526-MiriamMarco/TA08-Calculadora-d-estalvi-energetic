@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Infrastructure Audit | Dual-Turn Analytics</title>
+    <title>ITB Infrastructure Audit | Comparison Mode</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -22,7 +22,7 @@
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Nodes (627 Active Units)</label>
+                <label for="pcCount">Workstations (Nodes)</label>
                 <input type="number" id="pcCount" value="627" min="0">
             </div>
 
@@ -32,7 +32,7 @@
             </div>
 
             <div class="input-field">
-                <label for="calcMode">Operational Period</label>
+                <label for="calcMode">Analysis Period</label>
                 <select id="calcMode">
                     <option value="175">Academic Period (175 days)</option>
                     <option value="365">Full Fiscal Year (365 days)</option>
@@ -50,12 +50,12 @@
             </main>
 
         <section class="strategy-panel">
-            <h2>IT Sustainability Strategy</h2>
-            <p>Our plan targets 30% reduction in total footprint through server consolidation (Proxmox) and automated power management for the 12h operational cycle.</p>
+            <h2>IT Optimization Strategy</h2>
+            <p>Our plan targets 30% reduction in total footprint through server consolidation and automated resource management.</p>
 
             <div class="strategy-buttons">
                 <button class="btn-green" onclick="applySustainabilityPlan()">
-                    Compare with 30% Efficiency Goal
+                    Compare with 30% Goal
                 </button>
                 <button class="btn-outline" onclick="exportToPDF()">
                     Export PDF Report
@@ -64,7 +64,7 @@
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX | Double Shift Optimization Data</p>
+            <p>&copy; 2026 ITB - ASIX | Sustainability Data Analysis</p>
         </footer>
     </div>
 
