@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITB Sustainability Dashboard | Phase 3</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ITB <span class="highlight">Green</span> IT Metrics</h1>
+            <p>Infrastructure Power & Resource Calculator</p>
+        </header>
+
+        <section class="config-panel">
+            <div class="input-box">
+                <label>Tower PCs (Workstations)</label>
+                <input type="number" id="pcCount" value="30">
+            </div>
+            <div class="input-box">
+                <label>Period</label>
+                <select id="timePeriod">
+                    <option value="175">School Year (175 days)</option>
+                    <option value="365">Full Year (365 days)</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="runCalculations()">Execute 8 Metrics</button>
+        </section>
+
+        <div class="grid-container" id="resultsGrid">
+            </div>
+
+        <section class="optimization">
+            <button class="btn-save" onclick="applySustainabilityPlan()">Apply 30% Reduction Plan (Proxmox + Scripts)</button>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
