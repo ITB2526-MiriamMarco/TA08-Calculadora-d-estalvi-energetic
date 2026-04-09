@@ -1,15 +1,15 @@
 /**
- * ITB SUSTAINABILITY CALCULATOR - DUAL MODE
- * Handles both 175 and 365 day projections
+ * ITB INFRASTRUCTURE ANALYZER - PHASE 3
+ * Technical logic for IT systems and facility management
  */
 
-const JSON_DATA = {
+// 1. Data Source from dataclean.json and technical standards
+const INFRA_DATA = {
     electricity: {
-        winter: 4800,
-        variationRate: 0.2281
+        variationRate: 0.2281 // 22.81% increase forecast
     },
     water: {
-        dailyPerPerson: 133 // Liters/day
+        fixedDailyPerPax: 133 // Operational fixed cost per occupancy
     },
     costs: {
         cleaning: 175,
@@ -17,41 +17,48 @@ const JSON_DATA = {
     }
 };
 
-const CO2_FACTOR = 0.259;
+const PC_WATTAGE = 200;      // Active Tower PC
+const STANDBY_WATTAGE = 10;  // Idle/Sleep mode
+const CO2_FACTOR = 0.259;    // kg CO2 per kWh
 
+/**
+ * Main Infrastructure Calculation
+ */
 function runCalculations() {
+    // Inputs
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
-    const studentCount = parseInt(document.getElementById('studentCount').value) || 0;
+    const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
     const selectedDays = parseInt(document.getElementById('calcMode').value);
     const grid = document.getElementById('resultsGrid');
 
-    // 1. WATER LOGIC: Solo días activos
-    const totalWaterLitres = studentCount * JSON_DATA.water.dailyPerPerson * selectedDays;
+    // 1. WATER: Facility operational cost (Fixed)
+    const totalWaterLitres = occupancy * INFRA_DATA.water.fixedDailyPerPax * selectedDays;
 
-    // 2. ENERGY LOGIC
-    // Calculamos consumo activo (12h) y sumamos standby (24h) para el resto de días del año si es 365
-    const activeKwh = (pcCount * 200 * 12 * selectedDays) / 1000;
+    // 2. ENERGY: Active (12h/day) + Standby for non-active days
+    const activeKwh = (pcCount * PC_WATTAGE * 12 * selectedDays) / 1000;
+
+    // Standby days are the remaining days of the year (365 - selected)
     let standbyDays = (selectedDays === 365) ? 0 : (365 - selectedDays);
-    const standbyKwh = (pcCount * 10 * 24 * standbyDays) / 1000;
-    const totalKwh = activeKwh + standbyKwh;
+    const standbyKwh = (pcCount * STANDBY_WATTAGE * 24 * standbyDays) / 1000;
+    const totalEnergy = activeKwh + standbyKwh;
 
-    // 3. FINANCIAL LOGIC
-    // 175 días = 3 trimestres | 365 días = 12 meses
-    const factor = (selectedDays === 175) ? 3 : 12;
-    const cleaningCost = JSON_DATA.costs.cleaning * (selectedDays === 175 ? 3 : 12);
-    const suppliesCost = JSON_DATA.costs.supplies * (selectedDays === 175 ? 3 : 12);
+    // 3. MAINTENANCE: Scaled by period
+    const expenseFactor = (selectedDays === 175) ? 3 : 12; // 3 terms vs 12 months
+    const cleaningTotal = INFRA_DATA.costs.cleaning * expenseFactor;
+    const suppliesTotal = INFRA_DATA.costs.supplies * expenseFactor;
 
     const metrics = [
-        { title: "Total Water Use", val: totalWaterLitres.toLocaleString(), unit: "Litres", icon: "💧" },
-        { title: "Energy Consumption", val: totalKwh.toFixed(0), unit: "kWh", icon: "⚡" },
-        { title: "Carbon Footprint", val: (totalKwh * CO2_FACTOR).toFixed(1), unit: "kg CO2", icon: "🌍" },
-        { title: "2026 Forecast", val: (totalKwh * (1 + JSON_DATA.electricity.variationRate)).toFixed(0), unit: "kWh (+22%)", icon: "📈" },
-        { title: "Cleaning Expenses", val: cleaningCost.toFixed(2), unit: "€ Total", icon: "🧹" },
-        { title: "Supplies Expenses", val: suppliesCost.toFixed(2), unit: "€ Total", icon: "📦" },
-        { title: "Heat Dissipation", val: (activeKwh * 0.20).toFixed(0), unit: "kWh Waste", icon: "🔥" },
-        { title: "Per Student Impact", val: (totalWaterLitres / studentCount).toFixed(0), unit: "Litres/Person", icon: "👤" }
+        { title: "Total Facility Water", val: totalWaterLitres.toLocaleString(), unit: "Litres", icon: "💧" },
+        { title: "System Energy Load", val: totalEnergy.toFixed(0), unit: "kWh/Year", icon: "🖥️" },
+        { title: "Carbon Footprint", val: (totalEnergy * CO2_FACTOR).toFixed(1), unit: "kg CO2", icon: "🌍" },
+        { title: "Standby Leakage", val: standbyKwh.toFixed(1), unit: "kWh (Idle)", icon: "🔌" },
+        { title: "PSU Heat Waste", val: (activeKwh * 0.20).toFixed(0), unit: "kWh (Loss)", icon: "🔥" },
+        { title: "Maintenance Costs", val: cleaningTotal.toFixed(2), unit: "€", icon: "🛠️" },
+        { title: "2026 Energy Forecast", val: (totalEnergy * (1 + INFRA_DATA.electricity.variationRate)).toFixed(0), unit: "kWh", icon: "📈" },
+        { title: "Optimized Target", val: (totalEnergy * 0.70).toFixed(0), unit: "kWh (-30%)", icon: "🎯" }
     ];
 
+    // Render cards
     grid.innerHTML = "";
     metrics.forEach(m => {
         grid.innerHTML += `
@@ -64,22 +71,27 @@ function runCalculations() {
     });
 }
 
+/**
+ * Executes the 30% reduction plan across all metrics
+ */
 function applySustainabilityPlan() {
     const dataElements = document.querySelectorAll('.data');
     if (dataElements.length === 0) return;
 
     dataElements.forEach(el => {
-        let text = el.innerText.replace(/,/g, '');
-        let rawVal = parseFloat(text);
+        let rawVal = parseFloat(el.innerText.replace(/,/g, ''));
         if(!isNaN(rawVal)) {
             let reduced = (rawVal * 0.70).toFixed(1);
             el.innerText = parseFloat(reduced).toLocaleString();
-            el.style.color = "#22c55e";
+            el.style.color = "#22c55e"; // Sustainability Green
         }
     });
-    alert("30% Reduction Plan applied successfully.");
+    alert("System Optimization Active: 30% reduction applied to facility and energy loads.");
 }
 
+/**
+ * Report Generation
+ */
 function exportToPDF() {
     window.print();
 }

@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Multi-Period Sustainability Audit</title>
+    <title>ITB Infrastructure & Sustainability Audit</title>
+
     <link rel="stylesheet" href="css/style.css">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -12,53 +14,53 @@
     <div class="wrapper">
         <header>
             <div class="logo-area">
-                <h1>ITB <span class="green-tech">Eco</span>Audit</h1>
-                <p>Strategic Resource Management Dashboard</p>
+                <h1>ITB <span class="green-tech">System</span>Audit</h1>
+                <p>Infrastructure Resource Management | ASIX Phase 3</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Dual-Mode Active
+                <span class="dot"></span> Infrastructure Online
             </div>
         </header>
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Workstations (Tower PCs)</label>
+                <label for="pcCount">Workstations (Nodes)</label>
                 <input type="number" id="pcCount" value="30" min="0">
             </div>
 
             <div class="input-field">
-                <label for="studentCount">Student Population</label>
+                <label for="studentCount">Facility Occupancy (Pax)</label>
                 <input type="number" id="studentCount" value="300" min="0">
             </div>
 
             <div class="input-field">
-                <label for="calcMode">Calculation Period</label>
+                <label for="calcMode">Analysis Period</label>
                 <select id="calcMode">
-                    <option value="175">Academic Year (175 days)</option>
+                    <option value="175">Academic Period (175 days)</option>
                     <option value="365">Full Fiscal Year (365 days)</option>
                 </select>
             </div>
 
             <div class="actions">
                 <button class="btn-primary" onclick="runCalculations()">
-                    Generate Analysis
+                    Analyze Infrastructure
                 </button>
             </div>
         </section>
 
         <main class="dashboard-grid" id="resultsGrid">
             <div class="placeholder-text">
-                Select a period and population to calculate impact.
+                Select parameters and click "Analyze Infrastructure" to project technical impact.
             </div>
         </main>
 
         <section class="strategy-panel">
-            <h2>Sustainability Strategy</h2>
-            <p>Target: 30% reduction via virtualization and smart power-off scripts.</p>
+            <h2>IT Optimization Strategy</h2>
+            <p>Target: 30% reduction via server consolidation (Proxmox), PSU efficiency upgrades, and automated VLAN-based power management.</p>
 
             <div class="strategy-buttons">
                 <button class="btn-green" onclick="applySustainabilityPlan()">
-                    Execute 30% Reduction Plan
+                    Execute 30% Efficiency Plan
                 </button>
                 <button class="btn-outline" onclick="exportToPDF()">
                     Export Technical Report (PDF)
@@ -67,7 +69,7 @@
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Sustainability Report | Multi-Period Logic</p>
+            <p>&copy; 2026 ITB - ASIX Project | Data-Driven Systems Administration</p>
         </footer>
     </div>
 
