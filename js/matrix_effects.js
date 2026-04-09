@@ -1,24 +1,22 @@
 /**
  * ITB SUSTAINABILITY CALCULATOR - PHASE 3
- * Professional Logic & Infrastructure Analysis
+ * Using 133L/day per person standard
  */
 
-// 1. Data Source from dataclean.json
+// 1. Data Source from dataclean.json & Technical Specs
 const DATA_SOURCE = {
     winterEnergy: 4800,
     variationRate: 0.2281, // 22.81%
-    waterReading: 30.3,    // m3
-    officeSupplies: 100.4, // units
-    cleaningCost: 175       // €
+    officeSupplies: 100.4,
+    waterLitersPerPerson: 133 // Your specific parameter
 };
 
-// 2. Technical Constants
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
 
 /**
- * Main Calculation Engine
+ * Calculation Engine
  */
 function runCalculations() {
     // Get inputs
@@ -27,28 +25,24 @@ function runCalculations() {
     const days = parseInt(document.getElementById('timePeriod').value);
     const grid = document.getElementById('resultsGrid');
 
-    // ENERGY: Based on Towers (12h daily for double shift)
+    // ENERGY: Towers (12h daily usage for double shift)
     const totalKwh = (pcCount * PC_WATTAGE * 12 * days) / 1000;
 
-    // WATER: Based on Students (Assuming JSON data 30.3m3 was for 300 students/30 days)
-    const waterPerStudentDay = (DATA_SOURCE.waterReading / 300 / 30);
-    const totalWaterLitres = (waterPerStudentDay * studentCount * days) * 1000;
-
-    // SUPPLIES: Allocation per student
-    const suppliesPerStudent = (DATA_SOURCE.officeSupplies / 300);
+    // WATER: Based on 133L per person per day
+    const totalWaterLitres = studentCount * DATA_SOURCE.waterLitersPerPerson * days;
 
     const metrics = [
         { title: "Total Power Load", val: totalKwh.toFixed(0), unit: "kWh", icon: "⚡" },
         { title: "Carbon Footprint", val: (totalKwh * CO2_FACTOR).toFixed(1), unit: "kg CO2", icon: "🌍" },
-        { title: "Total Water Use", val: totalWaterLitres.toFixed(0), unit: "Litres", icon: "💧" },
-        { title: "2026 Power Forecast", val: (totalKwh * (1 + DATA_SOURCE.variationRate)).toFixed(0), unit: "kWh Est.", icon: "📈" },
-        { title: "Transition Waste", val: (pcCount * PC_WATTAGE * 1 * days / 1000).toFixed(0), unit: "kWh Lost", icon: "⏳" },
-        { title: "Energy Loss (Heat)", val: (totalKwh * 0.20).toFixed(0), unit: "kWh (PSU)", icon: "🔥" },
-        { title: "Supplies Allocation", val: (suppliesPerStudent * studentCount).toFixed(0), unit: "Total Units", icon: "📄" },
-        { title: "Phantom Load", val: (pcCount * STANDBY_WATTAGE * 12 * days / 1000).toFixed(0), unit: "kWh Standby", icon: "👻" }
+        { title: "Total Water Use", val: totalWaterLitres.toLocaleString(), unit: "Litres", icon: "💧" },
+        { title: "2026 Energy Forecast", val: (totalKwh * (1 + DATA_SOURCE.variationRate)).toFixed(0), unit: "kWh Est.", icon: "📈" },
+        { title: "Transition Loss", val: (pcCount * PC_WATTAGE * 1 * days / 1000).toFixed(0), unit: "kWh Lost", icon: "⏳" },
+        { title: "Heat Dissipation", val: (totalKwh * 0.20).toFixed(0), unit: "kWh (PSU)", icon: "🔥" },
+        { title: "Supplies Stock", val: (DATA_SOURCE.officeSupplies / 300 * studentCount).toFixed(0), unit: "Units", icon: "📄" },
+        { title: "Standby Consumption", val: (pcCount * STANDBY_WATTAGE * 12 * days / 1000).toFixed(0), unit: "kWh", icon: "👻" }
     ];
 
-    // Render Cards
+    // Clear and Render
     grid.innerHTML = "";
     metrics.forEach(m => {
         grid.innerHTML += `
@@ -62,27 +56,27 @@ function runCalculations() {
 }
 
 /**
- * Sustainability Plan Implementation (-30%)
+ * 30% Reduction Logic
  */
 function applySustainabilityPlan() {
-    const cards = document.querySelectorAll('.data');
-    if (cards.length === 0) {
-        alert("Run calculations first!");
-        return;
-    }
+    const dataElements = document.querySelectorAll('.data');
+    if (dataElements.length === 0) return;
 
-    cards.forEach(card => {
-        let currentVal = parseFloat(card.innerText);
-        let reducedVal = (currentVal * 0.70).toFixed(1);
-        card.innerText = reducedVal;
-        card.style.color = "#22c55e";
+    dataElements.forEach(el => {
+        // Clean number (remove commas for math)
+        let rawVal = parseFloat(el.innerText.replace(/,/g, ''));
+        let reduced = (rawVal * 0.70).toFixed(1);
+
+        // Format back with commas
+        el.innerText = parseFloat(reduced).toLocaleString();
+        el.style.color = "#22c55e";
     });
 
-    console.log("30% Reduction applied: Virtualization and logic optimization active.");
+    alert("30% Reduction Plan applied successfully to all metrics.");
 }
 
 /**
- * Technical Export
+ * Export to PDF
  */
 function exportToPDF() {
     window.print();
