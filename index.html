@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Infrastructure Audit | Dual-View</title>
+    <title>ITB Infrastructure Audit | Dual-Turn Analytics</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -13,26 +13,26 @@
         <header>
             <div class="logo-area">
                 <h1>ITB <span class="green-tech">System</span>Audit</h1>
-                <p>Infrastructure Resource Management | Phase 3</p>
+                <p>Infrastructure Resource Management | Double Shift Analysis</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Dual-View Mode Active
+                <span class="dot"></span> Operational Mode: 12h/Day
             </div>
         </header>
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Workstations (Nodes)</label>
-                <input type="number" id="pcCount" value="30" min="0">
+                <label for="pcCount">Nodes (627 Active Units)</label>
+                <input type="number" id="pcCount" value="627" min="0">
             </div>
 
             <div class="input-field">
-                <label for="studentCount">Facility Occupancy (Pax)</label>
-                <input type="number" id="studentCount" value="300" min="0">
+                <label for="studentCount">Daily Pax (800 AM + 800 PM)</label>
+                <input type="number" id="studentCount" value="1600" min="0">
             </div>
 
             <div class="input-field">
-                <label for="calcMode">Analysis Period</label>
+                <label for="calcMode">Operational Period</label>
                 <select id="calcMode">
                     <option value="175">Academic Period (175 days)</option>
                     <option value="365">Full Fiscal Year (365 days)</option>
@@ -47,27 +47,24 @@
         </section>
 
         <main class="dashboard-grid" id="resultsGrid">
-            <div class="placeholder-text">
-                Enter parameters to project technical impact.
-            </div>
-        </main>
+            </main>
 
         <section class="strategy-panel">
-            <h2>IT Optimization Strategy</h2>
-            <p>Click the button below to see the impact of our 30% reduction plan (Virtualization & Smart Power Management).</p>
+            <h2>IT Sustainability Strategy</h2>
+            <p>Our plan targets 30% reduction in total footprint through server consolidation (Proxmox) and automated power management for the 12h operational cycle.</p>
 
             <div class="strategy-buttons">
                 <button class="btn-green" onclick="applySustainabilityPlan()">
-                    Show 30% Reduction Goals
+                    Compare with 30% Efficiency Goal
                 </button>
                 <button class="btn-outline" onclick="exportToPDF()">
-                    Export Report (PDF)
+                    Export PDF Report
                 </button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Project | Data-Driven Infrastructure Management</p>
+            <p>&copy; 2026 ITB - ASIX | Double Shift Optimization Data</p>
         </footer>
     </div>
 
