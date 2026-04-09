@@ -1,21 +1,21 @@
 /**
  * ITB SUSTAINABILITY CALCULATOR - PHASE 3
- * Professional Logic for ASIX Systems
+ * Logic focused on Infrastructure & Total Resource Consumption
  */
 
-// 1. Data Source (Simulating values from your dataclean.json)
+// 1. Data Source from your dataclean.json
 const DATA_SOURCE = {
-    winterEnergy: 4800,
-    variationRate: 0.2281, // 22.81%
-    waterReading: 30.3,
-    officeSupplies: 100.4,
-    cleaningCost: 175
+    winterEnergy: 4800,     // kWh
+    variationRate: 0.2281,  // 22.81%
+    waterReading: 30.3,     // m3
+    officeSupplies: 100.4,  // units
+    cleaningCost: 175       // €
 };
 
-// 2. Technical Constants (ITB Infrastructure)
-const PC_WATTAGE = 200;      // Average Tower PC consumption
-const STANDBY_WATTAGE = 10;  // Monitor + Tower in sleep mode
-const CO2_FACTOR = 0.259;    // kg CO2 per kWh (Spain Mix)
+// 2. Technical Constants
+const PC_WATTAGE = 200;
+const STANDBY_WATTAGE = 10;
+const CO2_FACTOR = 0.259;
 
 /**
  * Executes the 8 Technical Calculations
@@ -25,22 +25,24 @@ function runCalculations() {
     const days = parseInt(document.getElementById('timePeriod').value);
     const grid = document.getElementById('resultsGrid');
 
-    // Formula 1: Double Shift Energy (6h + 6h = 12h daily)
+    // Calculation 1: Total Power (Double Shift 12h)
     const totalKwh = (pcCount * PC_WATTAGE * 12 * days) / 1000;
 
-    // The 8 Metrics required for Phase 3
+    // Calculation 6: Total Water Consumption (Projected to Liters)
+    // We assume the 30.3 m3 reading was for a 30-day period
+    const totalWaterLitres = (DATA_SOURCE.waterReading / 30) * days * 1000;
+
     const metrics = [
-        { title: "Energy Consumption", val: totalKwh.toFixed(0), unit: "kWh", icon: "⚡" },
+        { title: "Total Power Load", val: totalKwh.toFixed(0), unit: "kWh", icon: "⚡" },
         { title: "Carbon Footprint", val: (totalKwh * CO2_FACTOR).toFixed(1), unit: "kg CO2", icon: "🌍" },
-        { title: "Transition Waste", val: (pcCount * PC_WATTAGE * 1 * days / 1000).toFixed(0), unit: "kWh (Shift Gap)", icon: "⏳" },
+        { title: "Transition Waste", val: (pcCount * PC_WATTAGE * 1 * days / 1000).toFixed(0), unit: "kWh Lost", icon: "⏳" },
         { title: "2026 Power Forecast", val: (totalKwh * (1 + DATA_SOURCE.variationRate)).toFixed(0), unit: "kWh Est.", icon: "📈" },
-        { title: "Thermal Dissipation", val: (totalKwh * 0.20).toFixed(0), unit: "kWh as Heat", icon: "🔥" },
-        { title: "Water Intensity", val: (DATA_SOURCE.waterReading / 300).toFixed(3), unit: "m³/user", icon: "💧" },
-        { title: "Supplies Lifecycle", val: (DATA_SOURCE.officeSupplies / 10).toFixed(1), unit: "units/month", icon: "📄" },
+        { title: "Energy Loss (Heat)", val: (totalKwh * 0.20).toFixed(0), unit: "kWh (PSU)", icon: "🔥" },
+        { title: "Total Water Use", val: totalWaterLitres.toFixed(0), unit: "Litres", icon: "💧" },
+        { title: "Supplies Stock", val: (DATA_SOURCE.officeSupplies).toFixed(0), unit: "Total Units", icon: "📄" },
         { title: "Phantom Load", val: (pcCount * STANDBY_WATTAGE * 12 * days / 1000).toFixed(0), unit: "kWh Standby", icon: "👻" }
     ];
 
-    // Clear and Render Cards
     grid.innerHTML = "";
     metrics.forEach(m => {
         grid.innerHTML += `
@@ -54,7 +56,7 @@ function runCalculations() {
 }
 
 /**
- * Applies the 30% reduction strategy (Goal for Year 3)
+ * Sustainability Plan (30% reduction)
  */
 function applySustainabilityPlan() {
     const cards = document.querySelectorAll('.data');
@@ -66,21 +68,19 @@ function applySustainabilityPlan() {
 
     cards.forEach(card => {
         let currentVal = parseFloat(card.innerText);
-        // Applying 30% reduction (Value * 0.7)
-        let reducedVal = (currentVal * 0.70).toFixed(2);
+        // Applying the -30% multiplier (0.7)
+        let reducedVal = (currentVal * 0.70).toFixed(1);
 
         card.innerText = reducedVal;
-        card.style.color = "#22c55e"; // Success Green
+        card.style.color = "#22c55e";
     });
 
-    console.log("Optimization active: Proxmox Virtualization & Power Scripts implemented.");
+    console.log("30% reduction applied to all resource consumption metrics.");
 }
 
 /**
- * Report Export Logic
+ * Report Export
  */
 function exportToPDF() {
-    // Note: This triggers the browser's print-to-PDF interface
-    // It's the most reliable way to export the dashboard layout
     window.print();
 }
