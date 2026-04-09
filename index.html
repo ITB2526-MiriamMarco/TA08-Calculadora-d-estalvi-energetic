@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Sustainability Dashboard | Phase 3</title>
-
+    <title>ITB Multi-Period Sustainability Audit</title>
     <link rel="stylesheet" href="css/style.css">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -14,11 +12,11 @@
     <div class="wrapper">
         <header>
             <div class="logo-area">
-                <h1>ITB <span class="green-tech">Eco</span>Manager</h1>
-                <p>Advanced Systems & Network Administration | Sustainability Project</p>
+                <h1>ITB <span class="green-tech">Eco</span>Audit</h1>
+                <p>Strategic Resource Management Dashboard</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> System Online
+                <span class="dot"></span> Dual-Mode Active
             </div>
         </header>
 
@@ -29,34 +27,34 @@
             </div>
 
             <div class="input-field">
-                <label for="studentCount">Student Population (AM + PM)</label>
+                <label for="studentCount">Student Population</label>
                 <input type="number" id="studentCount" value="300" min="0">
             </div>
 
             <div class="input-field">
-                <label for="timePeriod">Analysis Period</label>
-                <select id="timePeriod">
-                    <option value="175">Academic Course (175 days)</option>
-                    <option value="365">Fiscal Year (365 days)</option>
+                <label for="calcMode">Calculation Period</label>
+                <select id="calcMode">
+                    <option value="175">Academic Year (175 days)</option>
+                    <option value="365">Full Fiscal Year (365 days)</option>
                 </select>
             </div>
 
             <div class="actions">
                 <button class="btn-primary" onclick="runCalculations()">
-                    Generate 8 Metrics
+                    Generate Analysis
                 </button>
             </div>
         </section>
 
         <main class="dashboard-grid" id="resultsGrid">
             <div class="placeholder-text">
-                Enter parameters and click "Generate Metrics" to start the analysis.
+                Select a period and population to calculate impact.
             </div>
         </main>
 
         <section class="strategy-panel">
             <h2>Sustainability Strategy</h2>
-            <p>Target: 30% reduction via Proxmox virtualization and intelligent resource management.</p>
+            <p>Target: 30% reduction via virtualization and smart power-off scripts.</p>
 
             <div class="strategy-buttons">
                 <button class="btn-green" onclick="applySustainabilityPlan()">
@@ -69,7 +67,7 @@
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Student Project | Powered by matrix_effects.js</p>
+            <p>&copy; 2026 ITB - ASIX Sustainability Report | Multi-Period Logic</p>
         </footer>
     </div>
 
