@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Infrastructure Audit | Decision Support System</title>
+    <title>ITB Infrastructure Audit | Dual-Turn Analytics</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -13,58 +13,36 @@
         <header>
             <div class="logo-area">
                 <h1>ITB <span class="green-tech">System</span>Audit</h1>
-                <p>Infrastructure Resource Management | ASIX Phase 3</p>
+                <p>Infrastructure Resource Management | Double Shift Analysis</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Systems Online: 627 Nodes
+                <span class="dot"></span> Operational Mode: 12h/Day
             </div>
         </header>
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Workstations (Nodes)</label>
-                <input type="number" id="pcCount" value="627" min="0" onchange="runCalculations()">
+                <label for="pcCount">Nodes (627 Active Units)</label>
+                <input type="number" id="pcCount" value="627" min="0">
             </div>
 
             <div class="input-field">
-                <label for="studentCount">Daily Pax (AM+PM)</label>
-                <input type="number" id="studentCount" value="1600" min="0" onchange="runCalculations()">
+                <label for="studentCount">Daily Pax (800 AM + 800 PM)</label>
+                <input type="number" id="studentCount" value="1600" min="0">
             </div>
 
             <div class="input-field">
-                <label for="calcMode">Analysis Period</label>
-                <select id="calcMode" onchange="runCalculations()">
+                <label for="calcMode">Operational Period</label>
+                <select id="calcMode">
                     <option value="175">Academic Period (175 days)</option>
                     <option value="365">Full Fiscal Year (365 days)</option>
                 </select>
             </div>
-        </section>
 
-        <section class="optimization-controls">
-            <h2>Simulate Optimization Policies</h2>
-            <p>Select IT strategies to reduce the current footprint and reach the sustainability goal:</p>
-            <div class="controls-grid">
-                <label class="control-item">
-                    <input type="checkbox" class="policy-check" data-impact="15" onchange="runCalculations()">
-                    <div class="control-text">
-                        <strong>Virtualization (Proxmox/LXC)</strong>
-                        <span>Consolidation of services -15% Energy</span>
-                    </div>
-                </label>
-                <label class="control-item">
-                    <input type="checkbox" class="policy-check" data-impact="10" onchange="runCalculations()">
-                    <div class="control-text">
-                        <strong>Smart Power (WOL/Scripts)</strong>
-                        <span>Automated night shutdown -10% Energy</span>
-                    </div>
-                </label>
-                <label class="control-item">
-                    <input type="checkbox" class="policy-check" data-impact="5" onchange="runCalculations()">
-                    <div class="control-text">
-                        <strong>IoT Resource Control</strong>
-                        <span>Flow sensors & Smart Lighting -5% Water/Elec</span>
-                    </div>
-                </label>
+            <div class="actions">
+                <button class="btn-primary" onclick="runCalculations()">
+                    Analyze Infrastructure
+                </button>
             </div>
         </section>
 
@@ -72,18 +50,21 @@
             </main>
 
         <section class="strategy-panel">
-            <div class="strategy-info">
-                <h2>Total Optimization Impact</h2>
-                <p>The <strong>Strategic Goal</strong> represents a 30% reduction from the initial baseline.</p>
-            </div>
+            <h2>IT Sustainability Strategy</h2>
+            <p>Our plan targets 30% reduction in total footprint through server consolidation (Proxmox) and automated power management for the 12h operational cycle.</p>
+
             <div class="strategy-buttons">
-                <button class="btn-primary" onclick="runCalculations()">Reset Analysis</button>
-                <button class="btn-outline" onclick="exportToPDF()">Export Technical Report</button>
+                <button class="btn-green" onclick="applySustainabilityPlan()">
+                    Compare with 30% Efficiency Goal
+                </button>
+                <button class="btn-outline" onclick="exportToPDF()">
+                    Export PDF Report
+                </button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Project | Double Shift Infrastructure Management</p>
+            <p>&copy; 2026 ITB - ASIX | Double Shift Optimization Data</p>
         </footer>
     </div>
 
