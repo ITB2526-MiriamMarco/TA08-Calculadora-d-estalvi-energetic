@@ -1,5 +1,5 @@
 /* ============================================================
-   ITB SYSTEM AUDIT - DEFINITIVE DARK TECH STYLE
+   ESTILOS WEB (ESTÉTICA MATRIX / DARK TECH)
    ============================================================ */
 :root {
     --primary-green: #22c55e;
@@ -31,7 +31,7 @@ header {
 
 .green-tech { color: var(--primary-green); text-transform: uppercase; font-weight: bold; }
 
-/* Configuración */
+/* Configuración de Inputs */
 .config-bar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -54,7 +54,7 @@ header {
     outline: none;
 }
 
-/* Dashboard Cards */
+/* Rejilla de Tarjetas */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -72,7 +72,7 @@ header {
 .data { font-size: 1.5rem; font-weight: bold; color: #fff; font-family: monospace; }
 .unit { font-size: 0.8rem; color: #a3a3a3; margin-left: 5px; }
 
-/* Botones de acción dentro de tarjetas */
+/* Botones de Políticas (Azul/Verde al activar) */
 .card-actions {
     display: flex;
     flex-wrap: wrap;
@@ -98,7 +98,7 @@ header {
     font-weight: bold;
 }
 
-/* GRÁFICO (GRANDE EN WEB) */
+/* Contenedor del Gráfico */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -109,7 +109,7 @@ header {
 
 .chart-box { height: 500px; width: 100%; }
 
-/* Finanzas */
+/* Resumen Económico */
 .financial-summary {
     background: #000;
     border: 2px solid var(--primary-green);
@@ -127,9 +127,7 @@ header {
 
 .value { font-size: 2.2rem; font-weight: bold; display: block; color: #fff; }
 
-/* ============================================================
-   BOTONES DE CONTROL (RESET Y EXPORT) - ¡AQUÍ ESTÁ EL ARREGLO!
-   ============================================================ */
+/* Botones Principales (Reset y PDF) */
 .strategy-panel {
     display: flex;
     justify-content: center;
@@ -144,14 +142,7 @@ header {
     padding: 12px 30px;
     border-radius: 6px;
     font-weight: bold;
-    font-size: 1rem;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
 }
 
 .btn-outline {
@@ -161,25 +152,27 @@ header {
     padding: 12px 30px;
     border-radius: 6px;
     font-weight: bold;
-    font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.btn-outline:hover {
-    border-color: #fff;
-    color: #fff;
-}
+footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
 /* ============================================================
-   SÓLO PARA PDF / IMPRESIÓN
+   ESTILOS EXCLUSIVOS PARA PDF (AL FINAL DEL ARCHIVO)
    ============================================================ */
 @media print {
+    /* Fondo limpio para ahorro de tinta */
     body { background: white !important; color: black !important; padding: 0; }
-    .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
-    .wrapper { max-width: 100%; }
-    header { border-bottom: 2px solid black; }
+
+    /* Ocultamos interfaz innecesaria */
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer {
+        display: none !important;
+    }
+
+    header { border-bottom: 2px solid black; margin-bottom: 20px; }
     .green-tech { color: black !important; }
+
+    /* Convertimos tarjetas en filas de informe */
     .dashboard-grid { display: block !important; }
     .card {
         background: white !important;
@@ -187,11 +180,39 @@ header {
         border-bottom: 1px solid #eee !important;
         display: flex !important;
         justify-content: space-between !important;
-        align-items: center !important;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        padding: 10px 0 !important;
     }
-    .data, .value { color: black !important; font-size: 1.2rem !important; }
-    .chart-container-wrapper { border: 1px solid #ccc !important; background: white !important; page-break-before: always; }
-    .chart-box { height: 350px !important; }
-    .financial-summary { border: 1px solid black !important; background: #f9f9f9 !important; }
+
+    .data, .value { color: black !important; font-size: 1.1rem !important; }
+
+    /* REAJUSTE DEL GRÁFICO PARA QUE NO SE SOLAPE */
+    .chart-container-wrapper {
+        border: 1px solid #ccc !important;
+        background: white !important;
+        padding: 20px !important;
+        margin: 60px auto !important; /* Margen muy amplio para bajar el gráfico */
+        width: 100% !important;
+        page-break-inside: avoid;
+    }
+
+    .chart-container-wrapper h2 {
+        color: black !important;
+        margin-bottom: 50px !important; /* Espacio para que el título no toque las barras */
+        text-align: center;
+        font-size: 1.4rem !important;
+    }
+
+    .chart-box {
+        height: 350px !important;
+        max-width: 100% !important;
+    }
+
+    /* Cuadro de resumen final */
+    .financial-summary {
+        border: 1px solid black !important;
+        background: #f9f9f9 !important;
+        padding: 20px !important;
+        margin-top: 40px !important;
+    }
 }

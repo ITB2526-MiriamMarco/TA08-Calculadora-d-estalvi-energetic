@@ -1,7 +1,13 @@
+/**
+ * ITB INFRASTRUCTURE AUDIT LOGIC - FINAL RELEASE
+ * Features: English UI, Fixed Scale Chart, Smart PDF Rescaling.
+ */
+
 const currentSystemYear = new Date().getFullYear();
 let myChart = null;
 let initialMaxEnergy = null;
 
+// --- DATA & CONSTANTS ---
 const INFRA_DATA = {
     electricity: { variationRate: 0.2281 },
     water: {
@@ -28,6 +34,7 @@ const TECH_POLICIES = [
 
 let activePolicies = new Set();
 
+// --- MAIN CALCULATIONS ---
 function runCalculations() {
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
     const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
@@ -47,15 +54,18 @@ function runCalculations() {
     const currEnergy = baseEnergy * (1 - savings.energy);
     const currWater = baseWater * (1 - savings.water);
 
+    // 3 Year Forecast for Chart
     const y1 = currEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
 
+    // Scale Lock logic (locks the Y axis based on the first calculation)
     if (initialMaxEnergy === null) {
         initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     }
     updateChart(y1, y2, y3);
 
+    // Render Metrics
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
@@ -83,6 +93,7 @@ function runCalculations() {
             </div>`;
     });
 
+    // Final Financial Totals
     const expM = selectedMode/30;
     const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
     const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
@@ -92,9 +103,11 @@ function runCalculations() {
     document.getElementById('totalCurrent').innerText = Math.round(cCurr).toLocaleString() + " €";
 
     const prog = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.3)) * 100));
-    document.getElementById('efficiencyBar').style.width = prog + "%";
+    const efficiencyBar = document.getElementById('efficiencyBar');
+    if(efficiencyBar) efficiencyBar.style.width = prog + "%";
 }
 
+// --- CHART RENDERING ---
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
@@ -111,32 +124,69 @@ function updateChart(y1, y2, y3) {
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 10, bottom: 10 } },
             scales: {
-                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' } },
-                x: { ticks: { color: '#fff', font: { size: 14 } } }
+                y: {
+                    beginAtZero: true,
+                    max: Math.round(initialMaxEnergy),
+                    ticks: { color: '#fff' }
+                },
+                x: { ticks: { color: '#fff' } }
             },
-            plugins: { legend: { labels: { color: '#fff' } } }
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: '#fff' }
+                }
+            }
         }
     });
 }
 
-// CAMBIO DE COLOR DINÁMICO PARA PDF
+// --- INTERACTION ---
+function toggleAction(id) {
+    activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id);
+    runCalculations();
+}
+
+function resetSavings() {
+    activePolicies.clear();
+    initialMaxEnergy = null;
+    runCalculations();
+}
+
+// --- PDF EXPORT FIX (Bajar títulos y leyendas) ---
 window.onbeforeprint = () => {
+    // Colors to Black for PDF
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
     myChart.options.plugins.legend.labels.color = '#000000';
-    myChart.update();
-};
-window.onafterprint = () => {
-    myChart.options.scales.x.ticks.color = '#ffffff';
-    myChart.options.scales.y.ticks.color = '#ffffff';
-    myChart.options.plugins.legend.labels.color = '#ffffff';
+
+    // Move legend to bottom to avoid overlapping with top titles
+    myChart.options.plugins.legend.position = 'bottom';
+
+    // Add internal padding to separate from the H2 title in CSS
+    myChart.options.layout.padding.top = 30;
+
+    myChart.options.maintainAspectRatio = true;
+    myChart.options.aspectRatio = 2.2;
+    myChart.resize();
     myChart.update();
 };
 
-function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
-function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
-window.onload = runCalculations;
+window.onafterprint = () => {
+    // Restore UI colors
+    myChart.options.scales.x.ticks.color = '#ffffff';
+    myChart.options.scales.y.ticks.color = '#ffffff';
+    myChart.options.plugins.legend.labels.color = '#ffffff';
+    myChart.options.plugins.legend.position = 'top';
+    myChart.options.layout.padding.top = 10;
+
+    myChart.options.maintainAspectRatio = false;
+    myChart.resize();
+    myChart.update();
+};
 
 window.onload = runCalculations;
