@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,27 +13,27 @@
         <header>
             <div class="logo-area">
                 <h1>ITB <span class="green-tech">System</span>Audit</h1>
-                <p>Análisis de Sostenibilidad Operativa | Infraestructura ASIX</p>
+                <p>Operational Sustainability Analysis | ASIX Infrastructure</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Auditoría Activa
+                <span class="dot"></span> Audit Mode Active
             </div>
         </header>
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Nodos de Red (PCs)</label>
+                <label for="pcCount">Network Nodes (PCs)</label>
                 <input type="number" id="pcCount" value="627" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
-                <label for="studentCount">Ocupación Diaria (Pax)</label>
+                <label for="studentCount">Daily Occupancy (Pax)</label>
                 <input type="number" id="studentCount" value="1600" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
-                <label for="calcMode">Periodo de Análisis</label>
+                <label for="calcMode">Analysis Period</label>
                 <select id="calcMode" onchange="runCalculations()">
-                    <option value="175">Periodo Lectivo (175 días)</option>
-                    <option value="365">Año Fiscal Completo (365 días)</option>
+                    <option value="175">Academic Period (175 days)</option>
+                    <option value="365">Full Fiscal Year (365 days)</option>
                 </select>
             </div>
         </section>
@@ -42,25 +42,25 @@
             </main>
 
         <section class="chart-container-wrapper">
-            <h2>Proyección de Tendencia Energética (Próximos 3 Años)</h2>
+            <h2>Energy Trend Projection (Next 3 Years)</h2>
             <div class="chart-box">
                 <canvas id="forecastChart"></canvas>
             </div>
         </section>
 
         <section class="financial-summary">
-            <h2>Impacto Financiero Estimado</h2>
+            <h2>Estimated Financial Impact</h2>
             <div class="summary-container">
                 <div class="summary-item">
-                    <span class="label">Línea Base Inicial</span>
+                    <span class="label">Initial Baseline</span>
                     <span id="totalBase" class="value">0€</span>
                 </div>
                 <div class="summary-item">
-                    <span class="label">Objetivo Estratégico (-30%)</span>
+                    <span class="label">Strategic Target (-30%)</span>
                     <span id="totalTarget" class="value goal">0€</span>
                 </div>
                 <div class="summary-item highlighted">
-                    <span class="label">Estado Actual con Ahorros</span>
+                    <span class="label">Current with Policies</span>
                     <span id="totalCurrent" class="value">0€</span>
                 </div>
             </div>
@@ -68,19 +68,19 @@
                 <div class="efficiency-bar-container">
                     <div id="efficiencyBar" class="efficiency-bar"></div>
                 </div>
-                <p id="efficiencyText">0% del objetivo estratégico alcanzado</p>
+                <p id="efficiencyText">0% of strategic goal achieved</p>
             </div>
         </section>
 
         <section class="strategy-panel">
             <div class="strategy-buttons">
-                <button class="btn-primary" onclick="resetSavings()">Resetear Políticas</button>
-                <button class="btn-outline" onclick="window.print()">Exportar Informe PDF</button>
+                <button class="btn-primary" onclick="resetSavings()">Reset Policies</button>
+                <button class="btn-outline" onclick="window.print()">Export PDF Report</button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; <span id="currentYearDisplay"></span> ITB - Proyecto ASIX | Dashboard de Infraestructura Sostenible</p>
+            <p>&copy; <span id="currentYearDisplay"></span> ITB - ASIX Project | Operational Sustainability Dashboard</p>
         </footer>
     </div>
 

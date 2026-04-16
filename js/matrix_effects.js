@@ -1,13 +1,13 @@
 /**
- * LÓGICA DE AUDITORÍA ITB - VERSIÓN FINAL
+ * ITB INFRASTRUCTURE AUDIT LOGIC - FINAL VERSION (ENGLISH)
  */
 
 const currentSystemYear = new Date().getFullYear();
 let myChart = null;
-let initialMaxEnergy = null; // Bloqueo de escala
+let initialMaxEnergy = null; // Scale lock
 
 const INFRA_DATA = {
-    electricity: { variationRate: 0.2281 }, // IPC Energético (22.81%)
+    electricity: { variationRate: 0.2281 }, // Energy Inflation (22.81%)
     water: {
         fixedDailyPerPax: 133,
         pricePerL: 0.0021,
@@ -22,12 +22,12 @@ const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
 
 const TECH_POLICIES = [
-    { id: 'fountains', label: "Cerrar Fuentes (8h)", impact: 0.10, type: 'water', category: "Agua Instalaciones" },
-    { id: 'iot_water', label: "Sensores IoT", impact: 0.05, type: 'water', category: "Agua Instalaciones" },
-    { id: 'virt', label: "Virtualización", impact: 0.15, type: 'energy', category: "Carga Energía Sistemas" },
-    { id: 'autoff', label: "Auto-Apagado", impact: 0.10, type: 'energy', category: "Carga Energía Sistemas" },
-    { id: 'remote', label: "Gestión Remota", impact: 0.10, type: 'maint', category: "Costes Limpieza" },
-    { id: 'inv', label: "Opt. Inventario", impact: 0.05, type: 'maint', category: "Costes Suministros" }
+    { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
+    { id: 'iot_water', label: "IoT Sensors", impact: 0.05, type: 'water', category: "Facility Water" },
+    { id: 'virt', label: "Virtualization", impact: 0.15, type: 'energy', category: "System Energy Load" },
+    { id: 'autoff', label: "Auto-Shutdown", impact: 0.10, type: 'energy', category: "System Energy Load" },
+    { id: 'remote', label: "Remote Management", impact: 0.10, type: 'maint', category: "Cleaning Costs" },
+    { id: 'inv', label: "Inventory Opt.", impact: 0.05, type: 'maint', category: "Supplies Costs" }
 ];
 
 let activePolicies = new Set();
@@ -39,39 +39,39 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- CÁLCULOS BASE ---
+    // --- BASE CALCULATIONS ---
     const schoolDays = 175;
     const idleDays = (selectedMode === 365) ? 190 : 0;
 
     const baseEnergy = ((pcCount * PC_WATTAGE * 12 * schoolDays) + (pcCount * STANDBY_WATTAGE * 12 * schoolDays) + (pcCount * STANDBY_WATTAGE * 24 * idleDays)) / 1000;
     const baseWater = (occupancy * INFRA_DATA.water.fixedDailyPerPax * schoolDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
 
-    // --- APLICACIÓN DE AHORROS ---
+    // --- APPLY SAVINGS ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
     const currEnergy = baseEnergy * (1 - savings.energy);
     const currWater = baseWater * (1 - savings.water);
 
-    // --- PROYECCIÓN 3 AÑOS (GRÁFICO) ---
+    // --- 3-YEAR PROJECTION (CHART) ---
     const y1 = currEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
 
-    // Bloqueo de escala inicial
+    // Initial scale lock
     if (initialMaxEnergy === null) {
         initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     }
     updateChart(y1, y2, y3);
 
-    // --- RENDER TARJETAS ---
+    // --- RENDER CARDS ---
     const metrics = [
-        { title: "Agua Instalaciones", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
-        { title: "Carga Energía Sistemas", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
-        { title: "Huella de Carbono", val: currEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍" },
-        { title: "Costes Limpieza", val: (INFRA_DATA.costs.cleaning * (selectedMode/30)) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * (selectedMode/30)) * 0.7, unit: "€", icon: "🛠️" },
-        { title: "Costes Suministros", val: (INFRA_DATA.costs.supplies * (selectedMode/30)) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * (selectedMode/30)) * 0.7, unit: "€", icon: "📦" },
-        { title: `Previsión ${currentSystemYear + 1}`, val: y1, goal: (baseEnergy * 0.7) * 1.22, unit: "kWh", icon: "📈" }
+        { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
+        { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
+        { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍" },
+        { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * (selectedMode/30)) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * (selectedMode/30)) * 0.7, unit: "€", icon: "🛠️" },
+        { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * (selectedMode/30)) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * (selectedMode/30)) * 0.7, unit: "€", icon: "📦" },
+        { title: `${currentSystemYear + 1} Forecast`, val: y1, goal: (baseEnergy * 0.7) * 1.22, unit: "kWh", icon: "📈" }
     ];
 
     const grid = document.getElementById('resultsGrid');
@@ -86,13 +86,13 @@ function runCalculations() {
                 <h3>${m.icon} ${m.title}</h3>
                 <span class="data">${Math.round(m.val).toLocaleString()}</span><span class="unit">${m.unit}</span>
                 <div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">
-                    Objetivo: ${Math.round(m.goal).toLocaleString()} ${m.unit}
+                    Target: ${Math.round(m.goal).toLocaleString()} ${m.unit}
                 </div>
                 <div class="card-actions">${actionButtons}</div>
             </div>`;
     });
 
-    // --- FINANZAS FINALES ---
+    // --- FINAL FINANCES ---
     const expM = selectedMode/30;
     const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
     const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
@@ -103,7 +103,7 @@ function runCalculations() {
 
     const prog = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.3)) * 100));
     document.getElementById('efficiencyBar').style.width = prog + "%";
-    document.getElementById('efficiencyText').innerText = `${Math.round(prog)}% del objetivo de eficiencia alcanzado`;
+    document.getElementById('efficiencyText').innerText = `${Math.round(prog)}% of efficiency goal reached`;
 }
 
 function updateChart(y1, y2, y3) {
@@ -114,7 +114,7 @@ function updateChart(y1, y2, y3) {
         data: {
             labels: [currentSystemYear + 1, currentSystemYear + 2, currentSystemYear + 3],
             datasets: [{
-                label: 'Consumo Proyectado (kWh)',
+                label: 'Projected Consumption (kWh)',
                 data: [Math.round(y1), Math.round(y2), Math.round(y3)],
                 backgroundColor: 'rgba(34, 197, 94, 0.4)',
                 borderColor: '#22c55e',
