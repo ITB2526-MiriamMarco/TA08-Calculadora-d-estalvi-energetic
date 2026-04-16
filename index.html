@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Infrastructure Audit | Management System</title>
+    <title>ITB Infrastructure Audit | Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -13,53 +13,54 @@
         <header>
             <div class="logo-area">
                 <h1>ITB <span class="green-tech">System</span>Audit</h1>
-                <p>Infrastructure Resource Management | Double Shift Analysis</p>
+                <p>Análisis de Sostenibilidad Operativa | Infraestructura ASIX</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Audit Mode Active
+                <span class="dot"></span> Auditoría Activa
             </div>
         </header>
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Nodes (PCs)</label>
+                <label for="pcCount">Nodos de Red (PCs)</label>
                 <input type="number" id="pcCount" value="627" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
-                <label for="studentCount">Daily Pax (AM+PM)</label>
+                <label for="studentCount">Ocupación Diaria (Pax)</label>
                 <input type="number" id="studentCount" value="1600" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
-                <label for="calcMode">Analysis Period</label>
+                <label for="calcMode">Periodo de Análisis</label>
                 <select id="calcMode" onchange="runCalculations()">
-                    <option value="175">Academic Period (175 days)</option>
-                    <option value="365">Full Fiscal Year (365 days)</option>
+                    <option value="175">Periodo Lectivo (175 días)</option>
+                    <option value="365">Año Fiscal Completo (365 días)</option>
                 </select>
             </div>
         </section>
 
-        <main class="dashboard-grid" id="resultsGrid"></main>
+        <main class="dashboard-grid" id="resultsGrid">
+            </main>
 
         <section class="chart-container-wrapper">
-            <h2>3-Year Energy Trend Projection</h2>
+            <h2>Proyección de Tendencia Energética (Próximos 3 Años)</h2>
             <div class="chart-box">
                 <canvas id="forecastChart"></canvas>
             </div>
         </section>
 
         <section class="financial-summary">
-            <h2>Financial Impact Overview</h2>
+            <h2>Impacto Financiero Estimado</h2>
             <div class="summary-container">
                 <div class="summary-item">
-                    <span class="label">Initial Baseline</span>
+                    <span class="label">Línea Base Inicial</span>
                     <span id="totalBase" class="value">0€</span>
                 </div>
                 <div class="summary-item">
-                    <span class="label">Strategic Target (-30%)</span>
+                    <span class="label">Objetivo Estratégico (-30%)</span>
                     <span id="totalTarget" class="value goal">0€</span>
                 </div>
                 <div class="summary-item highlighted">
-                    <span class="label">Current with Policies</span>
+                    <span class="label">Estado Actual con Ahorros</span>
                     <span id="totalCurrent" class="value">0€</span>
                 </div>
             </div>
@@ -67,19 +68,19 @@
                 <div class="efficiency-bar-container">
                     <div id="efficiencyBar" class="efficiency-bar"></div>
                 </div>
-                <p id="efficiencyText">0% of target reached</p>
+                <p id="efficiencyText">0% del objetivo estratégico alcanzado</p>
             </div>
         </section>
 
         <section class="strategy-panel">
             <div class="strategy-buttons">
-                <button class="btn-primary" onclick="resetSavings()">Reset All Policies</button>
-                <button class="btn-outline" onclick="window.print()">Export Report</button>
+                <button class="btn-primary" onclick="resetSavings()">Resetear Políticas</button>
+                <button class="btn-outline" onclick="window.print()">Exportar Informe PDF</button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; <span id="currentYearDisplay"></span> ITB - ASIX Project | Operational Sustainability Dashboard</p>
+            <p>&copy; <span id="currentYearDisplay"></span> ITB - Proyecto ASIX | Dashboard de Infraestructura Sostenible</p>
         </footer>
     </div>
 

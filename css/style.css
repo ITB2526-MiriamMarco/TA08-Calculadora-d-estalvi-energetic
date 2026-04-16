@@ -1,19 +1,21 @@
-/* --- RESET & BASE STYLES --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
+/* ============================================================
+   ESTILOS MAESTROS - ITB SYSTEM AUDIT (VERSIÓN PRO)
+   ============================================================ */
 
 :root {
     --primary-green: #22c55e;
     --dark-bg: #0a0a0a;
     --card-bg: #141414;
+    --input-bg: #000000;
     --border-color: #262626;
     --text-main: #e5e5e5;
     --text-muted: #a3a3a3;
     --accent-orange: #e67e22;
+}
+
+* {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 body {
@@ -28,162 +30,99 @@ body {
     margin: 0 auto;
 }
 
-/* --- HEADER --- */
+/* Header */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
+    padding: 30px 0;
     border-bottom: 1px solid var(--border-color);
-    margin-bottom: 30px;
-}
-
-h1 {
-    font-size: 1.8rem;
-    letter-spacing: 1px;
+    margin-bottom: 40px;
 }
 
 .green-tech {
     color: var(--primary-green);
-    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
 }
 
 .status-badge {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(34, 197, 94, 0.05);
     color: var(--primary-green);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 50px;
     border: 1px solid var(--primary-green);
-}
-
-.dot {
-    height: 8px;
-    width: 8px;
-    background-color: var(--primary-green);
-    border-radius: 50%;
-    display: inline-block;
-    animation: blink 1.5s infinite;
-}
-
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; }
-    100% { opacity: 1; }
-}
-
-/* --- CONFIGURATION BAR --- */
-.config-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    margin-bottom: 30px;
-}
-
-.input-field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.input-field label {
     font-size: 0.85rem;
-    color: var(--text-muted);
     font-weight: bold;
 }
 
+/* Configuración */
+.config-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 40px;
+}
+
+.input-field label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
 .input-field input, .input-field select {
+    width: 100%;
     background: #000;
     border: 1px solid var(--border-color);
     color: var(--primary-green);
-    padding: 10px;
-    border-radius: 4px;
-    outline: none;
+    padding: 12px;
+    border-radius: 6px;
     font-size: 1rem;
+    outline: none;
 }
 
-.input-field input:focus {
-    border-color: var(--primary-green);
-}
-
-/* --- DASHBOARD GRID --- */
+/* Dashboard Grid */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 25px;
     margin-bottom: 40px;
 }
 
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    transition: transform 0.2s, border-color 0.2s;
+    border-radius: 12px;
+    padding: 25px;
+    transition: 0.3s;
 }
 
-.card:hover {
-    border-color: var(--primary-green);
-    transform: translateY(-3px);
-}
+.card:hover { border-color: var(--primary-green); }
 
-.card h3 {
-    font-size: 1rem;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-main);
-}
-
-.data-container {
-    margin-bottom: 15px;
-}
-
-.current-row, .target-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 4px 0;
-}
+.card h3 { font-size: 1rem; margin-bottom: 15px; color: var(--text-muted); }
 
 .data {
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     font-weight: bold;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', monospace;
+    color: #fff;
 }
 
-.data-target {
-    font-size: 1rem;
-    font-weight: bold;
-}
+.unit { font-size: 0.9rem; color: var(--text-muted); margin-left: 5px; }
 
-.unit {
-    font-size: 0.8rem;
-    margin-left: 4px;
-    color: var(--text-muted);
-}
-
-.label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
-/* --- ACTION BUTTONS (TOGGLE) --- */
+/* Botones de Acción en Tarjetas */
 .card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px dashed var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .btn-action {
@@ -194,225 +133,68 @@ h1 {
     border-radius: 4px;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-action:hover {
-    border-color: var(--primary-green);
-    color: var(--primary-green);
 }
 
 .btn-action.active-btn {
-    background-color: var(--primary-green) !important;
+    background: var(--primary-green) !important;
     color: #000 !important;
-    border-color: var(--primary-green) !important;
     font-weight: bold;
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
 }
 
-/* --- CHART SECTION --- */
+/* Gráfico GRANDE */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 30px;
-}
-
-.chart-container-wrapper h2 {
-    font-size: 1.1rem;
-    color: var(--primary-green);
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 40px;
 }
 
 .chart-box {
-    height: 300px;
+    height: 500px; /* Tamaño solicitado */
     width: 100%;
 }
 
-/* --- FINANCIAL SUMMARY --- */
+.chart-container-wrapper h2 {
+    color: var(--primary-green);
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Finanzas */
 .financial-summary {
     background: #000;
     border: 2px solid var(--primary-green);
-    border-radius: 8px;
-    padding: 30px;
-    margin-bottom: 30px;
+    border-radius: 15px;
+    padding: 40px;
+    margin-bottom: 40px;
 }
 
 .summary-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 30px;
-    margin-top: 20px;
+    gap: 20px;
     text-align: center;
 }
 
-.summary-item .label {
-    display: block;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-}
-
-.summary-item .value {
-    font-size: 2rem;
-    font-weight: bold;
-    font-family: 'Courier New', Courier, monospace;
-}
-
-.summary-item.highlighted .value {
-    color: var(--primary-green);
-}
-
-.summary-item .value.goal {
-    color: var(--accent-orange);
-}
-
-.efficiency-wrapper {
-    margin-top: 30px;
-}
+.value { font-size: 2.2rem; font-weight: bold; font-family: monospace; display: block; }
+.highlighted .value { color: var(--primary-green); }
+.goal { color: var(--accent-orange); }
 
 .efficiency-bar-container {
-    width: 100%;
-    height: 12px;
-    background: #1a1a1a;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
+    width: 100%; height: 15px; background: #1a1a1a;
+    border-radius: 10px; margin: 30px 0 10px; overflow: hidden;
 }
 
 .efficiency-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #166534, var(--primary-green));
-    width: 0%;
-    transition: width 0.5s ease-out;
+    height: 100%; background: var(--primary-green);
+    width: 0%; transition: 1s ease-in-out;
 }
 
-#efficiencyText {
-    text-align: right;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
+/* Footer e Impresión */
+footer { text-align: center; padding: 40px; color: var(--text-muted); border-top: 1px solid var(--border-color); }
 
-/* --- GLOBAL ACTIONS --- */
-.strategy-panel {
-    text-align: center;
-    margin-bottom: 50px;
-}
-
-.strategy-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.btn-primary {
-    background: var(--primary-green);
-    color: #000;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--text-muted);
-    color: var(--text-muted);
-    padding: 12px 30px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.btn-outline:hover {
-    border-color: #fff;
-    color: #fff;
-}
-
-/* --- FOOTER --- */
-footer {
-    text-align: center;
-    padding: 40px 0;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    border-top: 1px solid var(--border-color);
-}
-
-/* --- PRINT MEDIA QUERY --- */
 @media print {
-    body { background: #fff; color: #000; }
+    body { background: white; color: black; }
     .config-bar, .strategy-panel, .btn-action { display: none; }
-    .card, .financial-summary { border: 1px solid #ccc; break-inside: avoid; }
-    .value, .data { color: #000 !important; }
-}
-/* --- AÑADIR ESTO AL FINAL DE TU CSS --- */
-
-/* Contenedor del Gráfico Proporcional */
-.chart-container-wrapper {
-    background: var(--card-bg, #141414);
-    border: 1px solid #22c55e;
-    border-radius: 12px;
-    padding: 30px;
-    margin: 40px 0;
-}
-
-.chart-box {
-    height: 500px; /* Tamaño grande para que se vea el impacto visual */
-    position: relative;
-}
-
-/* Estilo para los botones cuando están seleccionados */
-.btn-action.active-btn {
-    background-color: #22c55e !important;
-    color: #000 !important;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-}
-
-/* Sección de resumen financiero mejorada */
-.financial-summary {
-    background: #000;
-    border: 2px solid #22c55e;
-    border-radius: 12px;
-    padding: 30px;
-    margin-top: 40px;
-}
-
-.summary-container {
-    display: flex;
-    justify-content: space-around;
-    text-align: center;
-    gap: 20px;
-}
-
-.value {
-    font-size: 2.2rem;
-    font-weight: bold;
-    font-family: monospace;
-    display: block;
-}
-
-.highlighted .value { color: #22c55e; }
-.goal { color: #e67e22; } /* Naranja para el objetivo difícil */
-
-/* Barra de progreso */
-.efficiency-bar-container {
-    width: 100%;
-    height: 15px;
-    background: #1a1a1a;
-    border-radius: 10px;
-    margin: 20px 0;
-    overflow: hidden;
-}
-
-.efficiency-bar {
-    height: 100%;
-    background: #22c55e;
-    width: 0%;
-    transition: width 0.6s ease-in-out;
 }
