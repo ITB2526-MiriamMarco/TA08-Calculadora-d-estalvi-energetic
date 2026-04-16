@@ -16,6 +16,7 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 .config-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid var(--border-color); }
 .input-field { display: flex; flex-direction: column; gap: 8px; }
+.input-field label { color: var(--text-muted); font-size: 0.8rem; }
 .input-field input, .input-field select { background: #000; border: 1px solid var(--border-color); color: var(--primary-green); padding: 10px; border-radius: 4px; outline: none; }
 
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
@@ -37,6 +38,8 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .btn-primary { background: var(--primary-green); color: #000; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .btn-outline { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
+footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
+
 /* --- PDF PRINT OVERWRITE --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
@@ -52,19 +55,19 @@ header { display: flex; justify-content: space-between; align-items: center; pad
         position: relative !important;
         background: white !important;
         border: 1px solid #ccc !important;
-        margin: 40px 0 140px 0 !important; /* Espacio para no pisar el final */
+        margin: 40px 0 160px 0 !important; /* Margen inferior muy alto para evitar el solape de la primera foto */
         padding: 20px !important;
         height: auto !important;
         clear: both !important;
     }
-    .chart-box { height: 350px !important; display: block !important; position: relative !important; }
+    .chart-box { height: 380px !important; display: block !important; position: relative !important; }
 
     .financial-summary {
         display: block !important;
         clear: both !important;
         border: 2px solid black !important;
         background: #f9f9f9 !important;
-        margin-top: 60px !important;
+        margin-top: 80px !important; /* Separación extra respecto al gráfico */
         position: relative !important;
     }
     .value { color: black !important; }

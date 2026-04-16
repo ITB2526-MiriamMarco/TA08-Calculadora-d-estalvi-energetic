@@ -1,6 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - CORRECTED METRICS
- * Metrics: Standby, Wasted Energy, Forecast, and more.
+ * ITB INFRASTRUCTURE AUDIT - FIXED AXIS VERSION
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -39,7 +38,6 @@ function runCalculations() {
     const schoolDays = 175;
     const idleDays = (selectedMode === 365) ? 190 : 0;
 
-    // Cálculos de Energía
     const totalStandbyBase = (pcCount * STANDBY_WATTAGE * 24 * (schoolDays + idleDays)) / 1000;
     const activeEnergyBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
     const baseEnergy = activeEnergyBase + totalStandbyBase;
@@ -51,7 +49,6 @@ function runCalculations() {
     const currEnergy = baseEnergy * (1 - savings.energy);
     const currWater = baseWater * (1 - savings.water);
 
-    // Proyecciones para el gráfico
     const y1 = currEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
@@ -59,7 +56,6 @@ function runCalculations() {
     if (initialMaxEnergy === null) initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     updateChart(y1, y2, y3);
 
-    // Métricas técnicas (Las 8 labels)
     const expM = selectedMode/30;
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
@@ -85,7 +81,6 @@ function runCalculations() {
             </div>`;
     });
 
-    // Totales financieros
     const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
     const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
 
@@ -112,8 +107,8 @@ function updateChart(y1, y2, y3) {
         options: {
             responsive: true, maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' } },
-                x: { ticks: { color: '#fff' } }
+                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
             plugins: { legend: { position: 'top', labels: { color: '#fff' } } }
         }
@@ -123,10 +118,16 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
+// --- EL FIX CLAVE PARA LOS EJES ---
 window.onbeforeprint = () => {
+    // Forzamos negro para que se vea en el papel blanco
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
     myChart.options.plugins.legend.labels.color = '#000000';
+
+    // Cambiamos la rejilla a un gris suave para que no sea invisible
+    myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+
     myChart.options.plugins.legend.position = 'bottom';
     myChart.options.maintainAspectRatio = true;
     myChart.options.aspectRatio = 2.8;
@@ -134,9 +135,12 @@ window.onbeforeprint = () => {
 };
 
 window.onafterprint = () => {
+    // Restauramos el modo Matrix (Blanco sobre negro)
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.plugins.legend.labels.color = '#ffffff';
+    myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+
     myChart.options.plugins.legend.position = 'top';
     myChart.options.maintainAspectRatio = false;
     myChart.update();
