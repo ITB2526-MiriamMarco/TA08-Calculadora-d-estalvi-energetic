@@ -1,14 +1,19 @@
 /**
- * ITB INFRASTRUCTURE ANALYZER - FINAL PRODUCTION v4.0
- * Features: Dynamic Year, Toggle Policies, 3-Year Chart Projection.
+ * ITB INFRASTRUCTURE ANALYZER - PRO VERSION
+ * Features: Fixed Scale Chart, Dynamic Year, Toggle Policies.
  */
 
 const currentSystemYear = new Date().getFullYear();
-let myChart = null; // Instancia global del gráfico
+let myChart = null;
+let initialMaxEnergy = null; // Para bloquear la escala del gráfico
 
 const INFRA_DATA = {
-    electricity: { variationRate: 0.2281 }, // +22.81% aumento proyectado
-    water: { fixedDailyPerPax: 133, pricePerL: 0.0021, maintenanceLitersDay: 500 },
+    electricity: { variationRate: 0.2281 },
+    water: {
+        fixedDailyPerPax: 133,
+        pricePerL: 0.0021,
+        maintenanceLitersDay: 500
+    },
     costs: { cleaning: 175, supplies: 91.25 },
     energyPriceKwh: 0.24
 };
@@ -36,34 +41,40 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- CALENDARIO ---
+    // --- LOGICA DE CALENDARIO ---
     const schoolDays = 175;
     const idleDays = (selectedMode === 365) ? 190 : 0;
 
-    // --- ENERGÍA ---
+    // --- ENERGÍA (Base) ---
     const energySchoolActive = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
     const energySchoolStandby = (pcCount * STANDBY_WATTAGE * 12 * schoolDays) / 1000;
     const energyIdleStandby = (pcCount * STANDBY_WATTAGE * 24 * idleDays) / 1000;
     const baseEnergy = energySchoolActive + energySchoolStandby + energyIdleStandby;
     const baseStandbyTotal = energySchoolStandby + energyIdleStandby;
 
-    // --- AGUA ---
-    const baseWater = (occupancy * INFRA_DATA.water.fixedDailyPerPax * schoolDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
-
-    // --- AHORROS ACTIVOS ---
+    // --- AHORROS ---
     let currentSavings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) currentSavings[p.type] += p.impact; });
 
     const currentEnergy = baseEnergy * (1 - currentSavings.energy);
+    const baseWater = (occupancy * INFRA_DATA.water.fixedDailyPerPax * schoolDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
     const currentWater = baseWater * (1 - currentSavings.water);
 
-    // --- PROYECCIÓN 3 AÑOS (PARA EL GRÁFICO) ---
+    // --- PROYECCIÓN 3 AÑOS ---
     const y1 = currentEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
+
+    // Bloqueo de escala: Usamos el consumo máximo proyectado sin ahorros como tope
+    if (initialMaxEnergy === null) {
+        const baseYear1 = baseEnergy * (1 + INFRA_DATA.electricity.variationRate);
+        const baseYear2 = baseYear1 * (1 + INFRA_DATA.electricity.variationRate);
+        const baseYear3 = baseYear2 * (1 + INFRA_DATA.electricity.variationRate);
+        initialMaxEnergy = baseYear3 * 1.1;
+    }
     updateChart(y1, y2, y3);
 
-    // --- MÉTRICAS (8 TARJETAS) ---
+    // --- RENDER TARJETAS ---
     const metrics = [
         { title: "Facility Water", val: currentWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currentEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
@@ -75,7 +86,6 @@ function runCalculations() {
         { title: `${currentSystemYear + 1} Forecast`, val: y1, goal: (baseEnergy * 0.70) * (1.22), unit: "kWh", icon: "📈" }
     ];
 
-    // Render Cards
     grid.innerHTML = "";
     metrics.forEach(m => {
         const isAchieved = m.val <= m.goal;
@@ -83,21 +93,21 @@ function runCalculations() {
         let actionButtons = cardActions.length > 0 ? `<div class="card-actions">` +
             cardActions.map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("") + `</div>` : "";
 
-        grid.innerHTML += `<div class="card"><h3>${m.icon} ${m.title}</h3><div class="data-container"><div class="current-row"><span class="label">Actual:</span><span class="data">${Math.round(m.val).toLocaleString()}</span><span class="unit">${m.unit}</span></div><div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}"><span class="label">${isAchieved ? '✅ OK' : 'Target:'}</span><span class="data-target">${Math.round(m.goal).toLocaleString()}</span><span class="unit">${m.unit}</span></div></div>${actionButtons}</div>`;
+        grid.innerHTML += `<div class="card"><h3>${m.icon} ${m.title}</h3><div class="data-container"><div class="current-row"><span class="label">Actual:</span><span class="data">${Math.round(m.val).toLocaleString()}</span><span class="unit">${m.unit}</span></div><div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}"><span class="label">${isAchieved ? '✅ Goal Achieved' : 'Target:'}</span><span class="data-target">${Math.round(m.goal).toLocaleString()}</span><span class="unit">${m.unit}</span></div></div>${actionButtons}</div>`;
     });
 
     // --- FINANZAS ---
-    const expenseMonths = (selectedMode === 175) ? 3 : 12;
-    const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expenseMonths) + (INFRA_DATA.costs.supplies * expenseMonths);
-    const cCurrent = (currentWater * INFRA_DATA.water.pricePerL) + (currentEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expenseMonths) * (1 - currentSavings.maint)) + ((INFRA_DATA.costs.supplies * expenseMonths) * (1 - currentSavings.maint));
+    const expMonths = (selectedMode === 175) ? 3 : 12;
+    const costBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expMonths) + (INFRA_DATA.costs.supplies * expMonths);
+    const costCurr = (currentWater * INFRA_DATA.water.pricePerL) + (currentEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expMonths) * (1 - currentSavings.maint)) + ((INFRA_DATA.costs.supplies * expMonths) * (1 - currentSavings.maint));
 
-    document.getElementById('totalBase').innerText = Math.round(cBase).toLocaleString() + " €";
-    document.getElementById('totalTarget').innerText = Math.round(cBase * 0.70).toLocaleString() + " €";
-    document.getElementById('totalCurrent').innerText = Math.round(cCurrent).toLocaleString() + " €";
+    document.getElementById('totalBase').innerText = Math.round(costBase).toLocaleString() + " €";
+    document.getElementById('totalTarget').innerText = Math.round(costBase * 0.70).toLocaleString() + " €";
+    document.getElementById('totalCurrent').innerText = Math.round(costCurr).toLocaleString() + " €";
 
-    const progress = Math.min(100, Math.max(0, ((cBase - cCurrent) / (cBase * 0.30)) * 100));
+    const progress = Math.min(100, Math.max(0, ((costBase - costCurr) / (costBase * 0.30)) * 100));
     document.getElementById('efficiencyBar').style.width = progress + "%";
-    document.getElementById('efficiencyText').innerText = `${Math.round(progress)}% of strategic goal reached`;
+    document.getElementById('efficiencyText').innerText = `${Math.round(progress)}% of goal reached`;
 }
 
 function updateChart(y1, y2, y3) {
@@ -119,14 +129,19 @@ function updateChart(y1, y2, y3) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                x: { ticks: { color: '#ffffff' } }
+                y: {
+                    beginAtZero: true,
+                    max: Math.round(initialMaxEnergy),
+                    ticks: { color: '#ffffff' },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                x: { ticks: { color: '#ffffff', font: { size: 14 } } }
             },
-            plugins: { legend: { labels: { color: '#ffffff' } } }
+            plugins: { legend: { labels: { color: '#ffffff', font: { size: 14 } } } }
         }
     });
 }
 
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
-function resetSavings() { activePolicies.clear(); runCalculations(); }
+function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 window.onload = runCalculations;

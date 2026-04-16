@@ -350,3 +350,69 @@ footer {
     .card, .financial-summary { border: 1px solid #ccc; break-inside: avoid; }
     .value, .data { color: #000 !important; }
 }
+/* --- AÑADIR ESTO AL FINAL DE TU CSS --- */
+
+/* Contenedor del Gráfico Proporcional */
+.chart-container-wrapper {
+    background: var(--card-bg, #141414);
+    border: 1px solid #22c55e;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 40px 0;
+}
+
+.chart-box {
+    height: 500px; /* Tamaño grande para que se vea el impacto visual */
+    position: relative;
+}
+
+/* Estilo para los botones cuando están seleccionados */
+.btn-action.active-btn {
+    background-color: #22c55e !important;
+    color: #000 !important;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+/* Sección de resumen financiero mejorada */
+.financial-summary {
+    background: #000;
+    border: 2px solid #22c55e;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 40px;
+}
+
+.summary-container {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    gap: 20px;
+}
+
+.value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    font-family: monospace;
+    display: block;
+}
+
+.highlighted .value { color: #22c55e; }
+.goal { color: #e67e22; } /* Naranja para el objetivo difícil */
+
+/* Barra de progreso */
+.efficiency-bar-container {
+    width: 100%;
+    height: 15px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.efficiency-bar {
+    height: 100%;
+    background: #22c55e;
+    width: 0%;
+    transition: width 0.6s ease-in-out;
+}
