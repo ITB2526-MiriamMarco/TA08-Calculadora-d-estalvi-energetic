@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FULL VERSION
- * Metrics: 8 Labels | UI: English | PDF: Anti-overlap fix
+ * ITB INFRASTRUCTURE AUDIT - FINAL DEFINITIVE VERSION
+ * Restored 8 Original Metrics + PDF Anti-overlap Fix
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -55,37 +55,38 @@ function runCalculations() {
     if (initialMaxEnergy === null) initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     updateChart(y1, y2, y3);
 
-    // RESTAURACIÓN DE LAS 8 MÉTRICAS
+    // --- LAS 8 MÉTRICAS ORIGINALES RESTAURADAS ---
+    const expM = selectedMode/30;
+    const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
+    const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
+    const annualSaving = cBase - cCurr;
+
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
         { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍" },
-        { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * (selectedMode/30)) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * (selectedMode/30)) * 0.7, unit: "€", icon: "🛠️" },
-        { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * (selectedMode/30)) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * (selectedMode/30)) * 0.7, unit: "€", icon: "📦" },
-        { title: `${currentSystemYear + 1} Forecast`, val: y1, goal: (baseEnergy * 0.7) * 1.22, unit: "kWh", icon: "📈" },
+        { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * expM) * 0.7, unit: "€", icon: "🛠️" },
+        { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * expM) * 0.7, unit: "€", icon: "📦" },
         { title: "Network Uptime", val: 99.9, goal: 99.99, unit: "%", icon: "🌐" },
-        { title: "System Redundancy", val: 2, goal: 3, unit: "N", icon: "🔄" }
+        { title: "Estimated ROI", val: annualSaving > 0 ? (annualSaving / (cBase * 0.15)) * 100 : 0, goal: 25, unit: "%", icon: "💰" },
+        { title: "Payback Period", val: annualSaving > 0 ? (cBase * 0.2) / annualSaving : 0, goal: 1.5, unit: "Yrs", icon: "⏳" }
     ];
 
     const grid = document.getElementById('resultsGrid');
     grid.innerHTML = "";
     metrics.forEach(m => {
-        const isAchieved = (m.title.includes("Uptime") || m.title.includes("Redundancy")) ? m.val >= m.goal : m.val <= m.goal;
+        const isAchieved = (m.title === "Network Uptime" || m.title === "Estimated ROI") ? m.val >= m.goal : m.val <= m.goal;
         const cardActions = TECH_POLICIES.filter(p => p.category === m.title);
         let actionButtons = cardActions.map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("");
 
         grid.innerHTML += `
             <div class="card">
                 <h3>${m.icon} ${m.title}</h3>
-                <span class="data">${typeof m.val === 'number' ? Math.round(m.val).toLocaleString() : m.val}</span><span class="unit">${m.unit}</span>
+                <span class="data">${typeof m.val === 'number' ? m.val.toFixed(m.unit === "Yrs" ? 1 : 0).toLocaleString() : m.val}</span><span class="unit">${m.unit}</span>
                 <div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">Target: ${m.goal} ${m.unit}</div>
                 <div class="card-actions">${actionButtons}</div>
             </div>`;
     });
-
-    const expM = selectedMode/30;
-    const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
-    const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
 
     document.getElementById('totalBase').innerText = Math.round(cBase).toLocaleString() + " €";
     document.getElementById('totalTarget').innerText = Math.round(cBase * 0.7).toLocaleString() + " €";
@@ -121,7 +122,7 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- PDF EXPORT FIX ---
+// --- PDF FIX ---
 window.onbeforeprint = () => {
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
