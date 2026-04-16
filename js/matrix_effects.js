@@ -1,13 +1,9 @@
-/**
- * ITB INFRASTRUCTURE AUDIT LOGIC - FINAL VERSION (ENGLISH)
- */
-
 const currentSystemYear = new Date().getFullYear();
 let myChart = null;
-let initialMaxEnergy = null; // Scale lock
+let initialMaxEnergy = null;
 
 const INFRA_DATA = {
-    electricity: { variationRate: 0.2281 }, // Energy Inflation (22.81%)
+    electricity: { variationRate: 0.2281 },
     water: {
         fixedDailyPerPax: 133,
         pricePerL: 0.0021,
@@ -39,32 +35,27 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- BASE CALCULATIONS ---
     const schoolDays = 175;
     const idleDays = (selectedMode === 365) ? 190 : 0;
 
     const baseEnergy = ((pcCount * PC_WATTAGE * 12 * schoolDays) + (pcCount * STANDBY_WATTAGE * 12 * schoolDays) + (pcCount * STANDBY_WATTAGE * 24 * idleDays)) / 1000;
     const baseWater = (occupancy * INFRA_DATA.water.fixedDailyPerPax * schoolDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
 
-    // --- APPLY SAVINGS ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
     const currEnergy = baseEnergy * (1 - savings.energy);
     const currWater = baseWater * (1 - savings.water);
 
-    // --- 3-YEAR PROJECTION (CHART) ---
     const y1 = currEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
 
-    // Initial scale lock
     if (initialMaxEnergy === null) {
         initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     }
     updateChart(y1, y2, y3);
 
-    // --- RENDER CARDS ---
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
@@ -92,7 +83,6 @@ function runCalculations() {
             </div>`;
     });
 
-    // --- FINAL FINANCES ---
     const expM = selectedMode/30;
     const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
     const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
@@ -103,7 +93,6 @@ function runCalculations() {
 
     const prog = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.3)) * 100));
     document.getElementById('efficiencyBar').style.width = prog + "%";
-    document.getElementById('efficiencyText').innerText = `${Math.round(prog)}% of efficiency goal reached`;
 }
 
 function updateChart(y1, y2, y3) {
@@ -132,6 +121,22 @@ function updateChart(y1, y2, y3) {
     });
 }
 
+// CAMBIO DE COLOR DINÁMICO PARA PDF
+window.onbeforeprint = () => {
+    myChart.options.scales.x.ticks.color = '#000000';
+    myChart.options.scales.y.ticks.color = '#000000';
+    myChart.options.plugins.legend.labels.color = '#000000';
+    myChart.update();
+};
+window.onafterprint = () => {
+    myChart.options.scales.x.ticks.color = '#ffffff';
+    myChart.options.scales.y.ticks.color = '#ffffff';
+    myChart.options.plugins.legend.labels.color = '#ffffff';
+    myChart.update();
+};
+
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
+window.onload = runCalculations;
+
 window.onload = runCalculations;
