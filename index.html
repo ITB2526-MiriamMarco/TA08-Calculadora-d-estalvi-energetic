@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Infrastructure Audit | Expert Manager</title>
+    <title>ITB Infrastructure Audit | Comparison Mode</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -16,25 +16,33 @@
                 <p>Infrastructure Resource Management | Double Shift Analysis</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Active Nodes: 627
+                <span class="dot"></span> Operational Mode: 12h/Day
             </div>
         </header>
 
         <section class="config-bar">
             <div class="input-field">
-                <label for="pcCount">Nodes (PCs)</label>
-                <input type="number" id="pcCount" value="627" min="0" onchange="runCalculations()">
+                <label for="pcCount">Workstations (Nodes)</label>
+                <input type="number" id="pcCount" value="627" min="0">
             </div>
+
             <div class="input-field">
-                <label for="studentCount">Daily Pax (AM+PM)</label>
-                <input type="number" id="studentCount" value="1600" min="0" onchange="runCalculations()">
+                <label for="studentCount">Daily Pax (800 AM + 800 PM)</label>
+                <input type="number" id="studentCount" value="1600" min="0">
             </div>
+
             <div class="input-field">
-                <label for="calcMode">Period</label>
-                <select id="calcMode" onchange="runCalculations()">
-                    <option value="175">Academic Period</option>
-                    <option value="365">Full Fiscal Year</option>
+                <label for="calcMode">Analysis Period</label>
+                <select id="calcMode">
+                    <option value="175">Academic Period (175 days)</option>
+                    <option value="365">Full Fiscal Year (365 days)</option>
                 </select>
+            </div>
+
+            <div class="actions">
+                <button class="btn-primary" onclick="runCalculations()">
+                    Analyze Infrastructure
+                </button>
             </div>
         </section>
 
@@ -42,18 +50,21 @@
             </main>
 
         <section class="strategy-panel">
-            <div class="strategy-info">
-                <h3>Decision Support System</h3>
-                <p>Click the action buttons inside cards to simulate technical improvements.</p>
-            </div>
+            <h2>IT Optimization Strategy</h2>
+            <p>Our plan targets 30% reduction in total footprint through server consolidation and automated resource management.</p>
+
             <div class="strategy-buttons">
-                <button class="btn-primary" onclick="resetSavings()">Reset All Policies</button>
-                <button class="btn-outline" onclick="exportToPDF()">Export PDF Report</button>
+                <button class="btn-green" onclick="applySustainabilityPlan()">
+                    Compare with 30% Goal
+                </button>
+                <button class="btn-outline" onclick="exportToPDF()">
+                    Export PDF Report
+                </button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Project | Double Shift Optimization Data</p>
+            <p>&copy; 2026 ITB - ASIX | Sustainability Data Analysis</p>
         </footer>
     </div>
 
