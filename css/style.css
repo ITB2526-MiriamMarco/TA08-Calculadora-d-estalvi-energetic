@@ -37,16 +37,12 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .btn-primary { background: var(--primary-green); color: #000; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .btn-outline { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
-
 /* --- PDF PRINT OVERWRITE --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
-    .config-bar, .strategy-panel, .btn-action, footer { display: none !important; }
-
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
     header { border-bottom: 2px solid black; }
     .green-tech { color: black !important; }
-
     .dashboard-grid { display: block !important; }
     .card { background: white !important; border: none !important; border-bottom: 1px solid #eee !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 8px 0 !important; }
     .data { color: black !important; font-size: 1rem !important; }
@@ -56,12 +52,12 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         position: relative !important;
         background: white !important;
         border: 1px solid #ccc !important;
-        margin: 40px 0 140px 0 !important; /* Gran margen inferior para evitar solapes */
+        margin: 40px 0 140px 0 !important; /* Espacio para no pisar el final */
         padding: 20px !important;
         height: auto !important;
         clear: both !important;
     }
-    .chart-box { height: 350px !important; display: block !important; }
+    .chart-box { height: 350px !important; display: block !important; position: relative !important; }
 
     .financial-summary {
         display: block !important;
@@ -69,6 +65,7 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         border: 2px solid black !important;
         background: #f9f9f9 !important;
         margin-top: 60px !important;
+        position: relative !important;
     }
     .value { color: black !important; }
 }
