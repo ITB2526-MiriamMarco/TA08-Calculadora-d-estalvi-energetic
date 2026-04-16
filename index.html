@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ITB Infrastructure Audit | Management System</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -37,8 +38,14 @@
             </div>
         </section>
 
-        <main class="dashboard-grid" id="resultsGrid">
-            </main>
+        <main class="dashboard-grid" id="resultsGrid"></main>
+
+        <section class="chart-container-wrapper">
+            <h2>3-Year Energy Trend Projection</h2>
+            <div class="chart-box">
+                <canvas id="forecastChart"></canvas>
+            </div>
+        </section>
 
         <section class="financial-summary">
             <h2>Financial Impact Overview</h2>
@@ -46,17 +53,14 @@
                 <div class="summary-item">
                     <span class="label">Initial Baseline</span>
                     <span id="totalBase" class="value">0€</span>
-                    <small>Water + Elec + Maint</small>
                 </div>
                 <div class="summary-item">
                     <span class="label">Strategic Target (-30%)</span>
                     <span id="totalTarget" class="value goal">0€</span>
-                    <small>Efficiency Goal</small>
                 </div>
                 <div class="summary-item highlighted">
                     <span class="label">Current with Policies</span>
                     <span id="totalCurrent" class="value">0€</span>
-                    <small>Real-time estimation</small>
                 </div>
             </div>
             <div class="efficiency-wrapper">
@@ -70,7 +74,7 @@
         <section class="strategy-panel">
             <div class="strategy-buttons">
                 <button class="btn-primary" onclick="resetSavings()">Reset All Policies</button>
-                <button class="btn-outline" onclick="exportToPDF()">Export Technical Report</button>
+                <button class="btn-outline" onclick="window.print()">Export Report</button>
             </div>
         </section>
 
