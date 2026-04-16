@@ -1,6 +1,5 @@
 /**
- * ITB INFRASTRUCTURE ANALYZER - REVERTED VERSION
- * Values: 627 PCs | 1600 Pax | 12h Duty Cycle
+ * ITB INFRASTRUCTURE ANALYZER - FULL INTERACTIVE VERSION
  */
 
 const INFRA_DATA = {
@@ -13,71 +12,112 @@ const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
 
+// Estado de ahorros (se van sumando al pulsar botones)
+let appliedSavings = {
+    water: 0,
+    energy: 0,
+    maint: 0
+};
+
 function runCalculations() {
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
     const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
     const selectedDays = parseInt(document.getElementById('calcMode').value);
     const grid = document.getElementById('resultsGrid');
 
-    // 1. Calculations
-    const totalWater = occupancy * INFRA_DATA.water.fixedDailyPerPax * selectedDays;
-    const activeKwh = (pcCount * PC_WATTAGE * 12 * selectedDays) / 1000;
-    let standbyDays = (selectedDays === 365) ? 0 : (365 - selectedDays);
-    const standbyKwh = (pcCount * STANDBY_WATTAGE * 24 * standbyDays) / 1000;
-    const totalEnergy = activeKwh + standbyKwh;
+    // Cálculos Base
+    const baseWater = occupancy * INFRA_DATA.water.fixedDailyPerPax * selectedDays;
+    const baseEnergy = ((pcCount * PC_WATTAGE * 12 * selectedDays) / 1000) +
+                       ((pcCount * STANDBY_WATTAGE * 24 * (selectedDays === 365 ? 0 : 365-selectedDays)) / 1000);
     const expenseFactor = (selectedDays === 175) ? 3 : 12;
-    const resourceIndex = pcCount > 0 ? (totalWater / pcCount).toFixed(0) : 0;
+    const baseMaint = (INFRA_DATA.costs.cleaning + INFRA_DATA.costs.supplies) * expenseFactor;
+
+    // Aplicar Multiplicadores de Ahorro
+    const currentWater = baseWater * (1 - appliedSavings.water);
+    const currentEnergy = baseEnergy * (1 - appliedSavings.energy);
+    const currentMaint = baseMaint * (1 - appliedSavings.maint);
 
     const metrics = [
-        { title: "Facility Water", val: totalWater, unit: "L", icon: "💧" },
-        { title: "System Energy Load", val: totalEnergy.toFixed(0), unit: "kWh", icon: "🖥️" },
-        { title: "Carbon Footprint", val: (totalEnergy * CO2_FACTOR).toFixed(1), unit: "kg", icon: "🌍" },
-        { title: "Standby Leakage", val: standbyKwh.toFixed(1), unit: "kWh", icon: "🔌" },
-        { title: "Resource Load Index", val: resourceIndex, unit: "L/Node", icon: "📊" },
-        { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expenseFactor).toFixed(2), unit: "€", icon: "🛠️" },
-        { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expenseFactor).toFixed(2), unit: "€", icon: "📦" },
-        { title: "2026 Forecast", val: (totalEnergy * (1 + INFRA_DATA.electricity.variationRate)).toFixed(0), unit: "kWh", icon: "📈" }
+        {
+            id: 'water', title: "Facility Water", val: currentWater, goal: baseWater * 0.70, unit: "L", icon: "💧",
+            actions: [
+                { label: "Shut Fountains (8h)", impact: 0.10, type: 'water' },
+                { label: "IoT Leak Sensors", impact: 0.05, type: 'water' },
+                { label: "Dry Urinals", impact: 0.15, type: 'water' }
+            ]
+        },
+        {
+            id: 'energy', title: "Energy Load", val: currentEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️",
+            actions: [
+                { label: "Virtualization", impact: 0.15, type: 'energy' },
+                { label: "Scripts: Auto-Off", impact: 0.10, type: 'energy' },
+                { label: "LED Upgrade", impact: 0.05, type: 'energy' }
+            ]
+        },
+        {
+            id: 'carbon', title: "Carbon Footprint", val: currentEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍",
+            actions: []
+        },
+        {
+            id: 'resource', title: "Resource Index", val: pcCount > 0 ? (currentWater / pcCount) : 0, goal: (baseWater * 0.70 / (pcCount || 1)), unit: "L/Node", icon: "📊",
+            actions: []
+        },
+        {
+            id: 'maint', title: "Maintenance", val: currentMaint, goal: baseMaint * 0.70, unit: "€", icon: "🛠️",
+            actions: [
+                { label: "Inventory App", impact: 0.05, type: 'maint' },
+                { label: "Remote Support", impact: 0.10, type: 'maint' }
+            ]
+        },
+        {
+            id: 'forecast', title: "2026 Forecast", val: currentEnergy * (1.2281), goal: (baseEnergy * 0.70) * (1.2281), unit: "kWh", icon: "📈",
+            actions: []
+        }
     ];
 
     grid.innerHTML = "";
     metrics.forEach(m => {
-        let targetVal = (parseFloat(m.val) * 0.70).toFixed(m.val.toString().includes('.') ? 1 : 0);
+        const isAcheived = m.val <= m.goal;
+        let actionButtons = m.actions.map(btn =>
+            `<button class="btn-action" onclick="applyAction('${btn.type}', ${btn.impact}, this)">${btn.label} (-${btn.impact*100}%)</button>`
+        ).join("");
 
         grid.innerHTML += `
             <div class="card">
                 <h3>${m.icon} ${m.title}</h3>
                 <div class="data-container">
                     <div class="current-row">
-                        <span class="label">Actual:</span>
-                        <span class="data">${parseFloat(m.val).toLocaleString()}</span>
+                        <span class="label">Current Status:</span>
+                        <span class="data">${Math.round(m.val).toLocaleString()}</span>
                         <span class="unit">${m.unit}</span>
                     </div>
-                    <div class="target-row" style="display:none; color: #22c55e; margin-top: 12px; border-top: 1px dashed #555; padding-top: 8px; font-weight: bold;">
-                        <span class="label">Goal (-30%):</span>
-                        <span class="data-target">${parseFloat(targetVal).toLocaleString()}</span>
+                    <div class="target-row" style="color: ${isAcheived ? '#22c55e' : '#e67e22'}">
+                        <span class="label">${isAcheived ? '✅ Goal Achieved' : 'Strategic Goal (-30%):'}</span>
+                        <span class="data-target">${Math.round(m.goal).toLocaleString()}</span>
                         <span class="unit">${m.unit}</span>
                     </div>
                 </div>
+                <div class="card-actions">${actionButtons}</div>
             </div>
         `;
     });
 }
 
-function applySustainabilityPlan() {
-    const targets = document.querySelectorAll('.target-row');
-    if (targets.length === 0) return;
+function applyAction(type, impact, btnElement) {
+    // Desactivar botón para no aplicarlo dos veces
+    btnElement.disabled = true;
+    btnElement.style.opacity = "0.3";
+    btnElement.style.cursor = "not-allowed";
 
-    targets.forEach(el => {
-        el.style.display = "block";
-    });
-
-    document.querySelectorAll('.current-row').forEach(el => {
-        el.style.opacity = "0.5";
-    });
+    appliedSavings[type] += impact;
+    runCalculations();
 }
 
-function exportToPDF() {
-    window.print();
+function resetSavings() {
+    appliedSavings = { water: 0, energy: 0, maint: 0 };
+    runCalculations();
 }
+
+function exportToPDF() { window.print(); }
 
 window.onload = runCalculations;
