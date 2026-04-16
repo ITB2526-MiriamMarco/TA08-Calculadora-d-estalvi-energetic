@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITB Infrastructure Audit | Final 8-Metric Dashboard</title>
+    <title>ITB Infrastructure Audit | Financial Manager</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -16,7 +16,7 @@
                 <p>Infrastructure Resource Management | Double Shift Analysis</p>
             </div>
             <div class="status-badge">
-                <span class="dot"></span> Nodes: 627 | Pax: 1600
+                <span class="dot"></span> 2026 Audit Mode
             </div>
         </header>
 
@@ -30,10 +30,10 @@
                 <input type="number" id="studentCount" value="1600" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
-                <label for="calcMode">Period</label>
+                <label for="calcMode">Analysis Period</label>
                 <select id="calcMode" onchange="runCalculations()">
-                    <option value="175">Academic Period</option>
-                    <option value="365">Full Fiscal Year</option>
+                    <option value="175">Academic Period (175 days)</option>
+                    <option value="365">Full Fiscal Year (365 days)</option>
                 </select>
             </div>
         </section>
@@ -41,19 +41,42 @@
         <main class="dashboard-grid" id="resultsGrid">
             </main>
 
-        <section class="strategy-panel">
-            <div class="strategy-info">
-                <h3>Decision Support System</h3>
-                <p>Pulsa los botones en las tarjetas de Agua, Energía o Costes para aplicar medidas de optimización.</p>
+        <section class="financial-summary">
+            <h2>Financial Impact Overview</h2>
+            <div class="summary-container">
+                <div class="summary-item">
+                    <span class="label">Initial Baseline</span>
+                    <span id="totalBase" class="value">0€</span>
+                    <small>Water + Elec + Maint</small>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Strategic Target (-30%)</span>
+                    <span id="totalTarget" class="value goal">0€</span>
+                    <small>Efficiency Goal</small>
+                </div>
+                <div class="summary-item highlighted">
+                    <span class="label">Current with Policies</span>
+                    <span id="totalCurrent" class="value">0€</span>
+                    <small>Real-time estimation</small>
+                </div>
             </div>
+            <div class="efficiency-wrapper">
+                <div class="efficiency-bar-container">
+                    <div id="efficiencyBar" class="efficiency-bar"></div>
+                </div>
+                <p id="efficiencyText">0% of target reached</p>
+            </div>
+        </section>
+
+        <section class="strategy-panel">
             <div class="strategy-buttons">
-                <button class="btn-primary" onclick="resetSavings()">Reiniciar Simulación</button>
-                <button class="btn-outline" onclick="exportToPDF()">Exportar PDF</button>
+                <button class="btn-primary" onclick="resetSavings()">Reset All Policies</button>
+                <button class="btn-outline" onclick="exportToPDF()">Export Technical Report</button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Project | 8-Metric Technical Audit</p>
+            <p>&copy; 2026 ITB - ASIX Project | Operational Sustainability Dashboard</p>
         </footer>
     </div>
 

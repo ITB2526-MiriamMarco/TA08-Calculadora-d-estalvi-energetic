@@ -1,19 +1,19 @@
 /**
- * ITB INFRASTRUCTURE ANALYZER - TOGGLE ACTIONS VERSION
- * 8 Metrics | Double Shift Logic | On/Off Policy Buttons
+ * ITB INFRASTRUCTURE ANALYZER - FINANCIAL & TOGGLE VERSION
  */
 
 const INFRA_DATA = {
     electricity: { variationRate: 0.2281 },
-    water: { fixedDailyPerPax: 133 },
-    costs: { cleaning: 175, supplies: 91.25 }
+    water: { fixedDailyPerPax: 133, pricePerL: 0.0021 }, // Approx 2.10€/m3
+    costs: { cleaning: 175, supplies: 91.25 },
+    energyPriceKwh: 0.24 // Average EDU/Industrial price for 2026
 };
 
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
 
-// Definición de las acciones técnicas disponibles
+// Policy Database
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
     { id: 'iot_water', label: "IoT Sensors", impact: 0.05, type: 'water', category: "Facility Water" },
@@ -23,7 +23,6 @@ const TECH_POLICIES = [
     { id: 'inv', label: "Inventory Opt.", impact: 0.05, type: 'maint', category: "Supplies Costs" }
 ];
 
-// Estado de políticas activas (usamos un Set para que no se dupliquen)
 let activePolicies = new Set();
 
 function runCalculations() {
@@ -32,7 +31,7 @@ function runCalculations() {
     const selectedDays = parseInt(document.getElementById('calcMode').value);
     const grid = document.getElementById('resultsGrid');
 
-    // 1. CÁLCULOS BASE (Línea de referencia)
+    // 1. BASELINE CALCULATIONS
     const baseWater = occupancy * INFRA_DATA.water.fixedDailyPerPax * selectedDays;
     const activeKwh = (pcCount * PC_WATTAGE * 12 * selectedDays) / 1000;
     let standbyDays = (selectedDays === 365) ? 0 : (365 - selectedDays);
@@ -43,7 +42,7 @@ function runCalculations() {
     const baseCleaning = INFRA_DATA.costs.cleaning * expenseFactor;
     const baseSupplies = INFRA_DATA.costs.supplies * expenseFactor;
 
-    // 2. CALCULAR SUMATORIA DE AHORROS SEGÚN POLÍTICAS ACTIVAS
+    // 2. SUM ACTIVE SAVINGS
     let currentSavings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(policy => {
         if (activePolicies.has(policy.id)) {
@@ -51,14 +50,14 @@ function runCalculations() {
         }
     });
 
-    // 3. APLICAR AHORROS A LOS VALORES ACTUALES
+    // 3. APPLY IMPACT
     const currentWater = baseWater * (1 - currentSavings.water);
     const currentEnergy = baseEnergy * (1 - currentSavings.energy);
     const currentStandby = baseStandbyKwh * (1 - currentSavings.energy);
     const currentCleaning = baseCleaning * (1 - currentSavings.maint);
     const currentSupplies = baseSupplies * (1 - currentSavings.maint);
 
-    // 4. ESTRUCTURA DE LAS 8 MÉTRICAS
+    // 4. METRICS ARRAY (8 Cards)
     const metrics = [
         { title: "Facility Water", val: currentWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currentEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
@@ -70,26 +69,13 @@ function runCalculations() {
         { title: "2026 Forecast", val: currentEnergy * (1 + INFRA_DATA.electricity.variationRate), goal: (baseEnergy * 0.70) * (1.2281), unit: "kWh", icon: "📈" }
     ];
 
-    // 5. RENDERIZAR TARJETAS
+    // Render Cards
     grid.innerHTML = "";
     metrics.forEach(m => {
         const isAchieved = m.val <= m.goal;
-        const statusLabel = isAchieved ? '✅ Goal Achieved' : 'Target (-30%):';
-
-        // Filtrar qué botones de TECH_POLICIES pertenecen a esta tarjeta
         const cardActions = TECH_POLICIES.filter(p => p.category === m.title);
-        let actionButtons = "";
-
-        if (cardActions.length > 0) {
-            actionButtons = `<div class="card-actions">` +
-                cardActions.map(btn => {
-                    const isActive = activePolicies.has(btn.id);
-                    return `<button class="btn-action ${isActive ? 'active-btn' : ''}"
-                            onclick="toggleAction('${btn.id}')">
-                            ${btn.label}
-                            </button>`;
-                }).join("") + `</div>`;
-        }
+        let actionButtons = cardActions.length > 0 ? `<div class="card-actions">` +
+            cardActions.map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("") + `</div>` : "";
 
         grid.innerHTML += `
             <div class="card">
@@ -101,7 +87,7 @@ function runCalculations() {
                         <span class="unit">${m.unit}</span>
                     </div>
                     <div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">
-                        <span class="label">${statusLabel}</span>
+                        <span class="label">${isAchieved ? '✅ Goal Achieved' : 'Target:'}</span>
                         <span class="data-target">${Math.round(m.goal).toLocaleString()}</span>
                         <span class="unit">${m.unit}</span>
                     </div>
@@ -110,34 +96,38 @@ function runCalculations() {
             </div>
         `;
     });
+
+    // 5. FINANCIAL CALCULATIONS
+    const calcCost = (w, e, c, s) => (w * INFRA_DATA.water.pricePerL) + (e * INFRA_DATA.energyPriceKwh) + c + s;
+
+    const totalBase = calcCost(baseWater, baseEnergy, baseCleaning, baseSupplies);
+    const totalTarget = totalBase * 0.70;
+    const totalCurrent = calcCost(currentWater, currentEnergy, currentCleaning, currentSupplies);
+
+    // Update UI
+    document.getElementById('totalBase').innerText = Math.round(totalBase).toLocaleString() + " €";
+    document.getElementById('totalTarget').innerText = Math.round(totalTarget).toLocaleString() + " €";
+    document.getElementById('totalCurrent').innerText = Math.round(totalCurrent).toLocaleString() + " €";
+
+    // Efficiency Bar Logic
+    const potentialSaving = totalBase - totalTarget;
+    const currentSaving = totalBase - totalCurrent;
+    const progress = Math.min(100, Math.max(0, (currentSaving / potentialSaving) * 100));
+
+    document.getElementById('efficiencyBar').style.width = progress + "%";
+    document.getElementById('efficiencyText').innerText = `${Math.round(progress)}% of strategic goal achieved`;
 }
 
-/**
- * Activa o desactiva una política de ahorro
- */
 function toggleAction(policyId) {
-    if (activePolicies.has(policyId)) {
-        activePolicies.delete(policyId);
-    } else {
-        activePolicies.add(policyId);
-    }
+    activePolicies.has(policyId) ? activePolicies.delete(policyId) : activePolicies.add(policyId);
     runCalculations();
 }
 
-/**
- * Resetea todas las políticas
- */
 function resetSavings() {
     activePolicies.clear();
     runCalculations();
 }
 
-/**
- * Exportación a PDF (Print)
- */
-function exportToPDF() {
-    window.print();
-}
+function exportToPDF() { window.print(); }
 
-// Inicialización
 window.onload = runCalculations;
