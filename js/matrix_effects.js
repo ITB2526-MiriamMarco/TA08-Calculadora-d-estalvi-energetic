@@ -1,6 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - JS FINAL UNIFICADO
- * Mantiene los 8 cálculos, diseño de tarjetas y parche de impresión.
+ * ITB INFRASTRUCTURE AUDIT - LOGIC ENGINE
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -86,11 +85,7 @@ function runCalculations() {
                         ${Math.round(m.goal).toLocaleString()} ${m.unit}
                     </span>
                 </div>
-                <div class="card-actions">
-                    ${TECH_POLICIES.filter(p => p.category === m.title).map(btn =>
-                        `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`
-                    ).join("")}
-                </div>
+                <div class="card-actions">${TECH_POLICIES.filter(p => p.category === m.title).map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("")}</div>
             </div>`;
     });
 
@@ -120,7 +115,7 @@ function updateChart(y1, y2, y3) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { left: 60, right: 30, top: 20, bottom: 20 } },
+            layout: { padding: { left: 40 } }, // Mueve el gráfico a la derecha para ver los números
             scales: {
                 y: {
                     beginAtZero: true,
@@ -130,7 +125,7 @@ function updateChart(y1, y2, y3) {
                 },
                 x: { ticks: { color: '#ffffff' }, grid: { display: false } }
             },
-            plugins: { legend: { labels: { color: '#ffffff', padding: 20 } } }
+            plugins: { legend: { labels: { color: '#ffffff', font: { size: 12 } } } }
         }
     });
 }
@@ -138,18 +133,17 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- EVENTOS DE IMPRESIÓN ---
+// --- PARCHE DE COLORES PARA PDF ---
 window.onbeforeprint = () => {
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.scales.x.grid = { display: true, color: '#000000' };
     myChart.options.plugins.legend.labels.color = '#000000';
     myChart.update();
 };
-
 window.onafterprint = () => {
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
+    myChart.options.plugins.legend.labels.color = '#ffffff';
     myChart.update();
 };
 
