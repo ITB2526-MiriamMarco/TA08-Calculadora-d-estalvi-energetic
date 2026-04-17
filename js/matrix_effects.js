@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FIXED AXIS VERSION
+ * ITB INFRASTRUCTURE AUDIT - PDF AXIS & ALIGNMENT FIX
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -118,28 +118,30 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- EL FIX CLAVE PARA LOS EJES ---
+// --- CONFIGURACIÓN PARA PDF (EJES Y DATOS) ---
 window.onbeforeprint = () => {
-    // Forzamos negro para que se vea en el papel blanco
+    // Forzamos texto negro puro para que sea visible en el PDF
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
     myChart.options.plugins.legend.labels.color = '#000000';
 
-    // Cambiamos la rejilla a un gris suave para que no sea invisible
-    myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+    // Mostramos las líneas de los ejes para que se vea el marco del gráfico
+    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
+    myChart.options.scales.y.grid = { display: true, color: '#e5e5e5', lineWidth: 1 };
 
     myChart.options.plugins.legend.position = 'bottom';
     myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.8;
+    myChart.options.aspectRatio = 2.5;
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Restauramos el modo Matrix (Blanco sobre negro)
+    // Volvemos al estilo Matrix (Blanco)
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.plugins.legend.labels.color = '#ffffff';
-    myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+    myChart.options.scales.x.grid = { display: false };
+    myChart.options.scales.y.grid = { color: 'rgba(255,255,255,0.1)' };
 
     myChart.options.plugins.legend.position = 'top';
     myChart.options.maintainAspectRatio = false;
