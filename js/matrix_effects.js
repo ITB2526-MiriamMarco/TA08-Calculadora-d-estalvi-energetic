@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - LOGIC ENGINE
+ * ITB INFRASTRUCTURE AUDIT - JS FINAL
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -99,6 +99,8 @@ function runCalculations() {
 
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
+    const isPrinting = document.body.classList.contains('printing');
+
     if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'bar',
@@ -107,7 +109,7 @@ function updateChart(y1, y2, y3) {
             datasets: [{
                 label: 'Projected Consumption (kWh)',
                 data: [Math.round(y1), Math.round(y2), Math.round(y3)],
-                backgroundColor: 'rgba(34, 197, 94, 0.4)',
+                backgroundColor: isPrinting ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 0.4)',
                 borderColor: '#22c55e',
                 borderWidth: 2
             }]
@@ -115,36 +117,39 @@ function updateChart(y1, y2, y3) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { left: 40 } }, // Mueve el gráfico a la derecha para ver los números
+            layout: { padding: { left: 60, right: 20, top: 10, bottom: 10 } },
             scales: {
                 y: {
                     beginAtZero: true,
                     max: Math.round(initialMaxEnergy),
-                    ticks: { color: '#ffffff', font: { weight: 'bold' } },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+                    ticks: { color: isPrinting ? '#000' : '#fff', font: { weight: 'bold' } },
+                    grid: { color: isPrinting ? '#ddd' : 'rgba(255,255,255,0.1)' }
                 },
-                x: { ticks: { color: '#ffffff' }, grid: { display: false } }
+                x: {
+                    ticks: { color: isPrinting ? '#000' : '#fff' },
+                    grid: { display: false }
+                }
             },
-            plugins: { legend: { labels: { color: '#ffffff', font: { size: 12 } } } }
+            plugins: {
+                legend: { labels: { color: isPrinting ? '#000' : '#fff' } }
+            }
         }
     });
 }
 
+// ESTA ES LA FUNCIÓN QUE DEBE LLAMAR TU BOTÓN "Export PDF"
+function exportPDF() {
+    document.body.classList.add('printing');
+    runCalculations(); // Cambia colores a modo impresión
+
+    setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing');
+        runCalculations(); // Devuelve colores Matrix
+    }, 300);
+}
+
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
-
-// --- PARCHE DE COLORES PARA PDF ---
-window.onbeforeprint = () => {
-    myChart.options.scales.x.ticks.color = '#000000';
-    myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.plugins.legend.labels.color = '#000000';
-    myChart.update();
-};
-window.onafterprint = () => {
-    myChart.options.scales.x.ticks.color = '#ffffff';
-    myChart.options.scales.y.ticks.color = '#ffffff';
-    myChart.options.plugins.legend.labels.color = '#ffffff';
-    myChart.update();
-};
 
 window.onload = runCalculations;
