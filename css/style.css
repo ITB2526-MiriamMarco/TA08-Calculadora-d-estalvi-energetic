@@ -16,7 +16,6 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 .config-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid var(--border-color); }
 .input-field { display: flex; flex-direction: column; gap: 8px; }
-.input-field label { color: var(--text-muted); font-size: 0.8rem; }
 .input-field input, .input-field select { background: #000; border: 1px solid var(--border-color); color: var(--primary-green); padding: 10px; border-radius: 4px; outline: none; }
 
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
@@ -40,7 +39,7 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
-/* --- AJUSTES PDF --- */
+/* --- AJUSTES IMPRESIÓN --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
     .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
@@ -53,22 +52,20 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
-        border: 1px solid #ccc !important;
-        margin: 40px auto 140px auto !important;
-        padding: 20px !important;
-        width: 95% !important;
+        border: none !important;
+        margin: 40px 0 160px 0 !important;
+        padding-left: 50px !important; /* Margen extra para los números del eje */
+        width: 100% !important;
         height: auto !important;
-        clear: both !important;
     }
 
     .chart-box {
-        height: 400px !important;
+        height: 450px !important;
         width: 100% !important;
     }
 
     .financial-summary {
         display: block !important;
-        clear: both !important;
         border: 2px solid black !important;
         background: #f9f9f9 !important;
         margin-top: 100px !important;
