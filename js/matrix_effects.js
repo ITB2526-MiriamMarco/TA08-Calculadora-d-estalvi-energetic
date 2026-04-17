@@ -1,5 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - PDF AXIS & ALIGNMENT FIX
+ * ITB INFRASTRUCTURE AUDIT - PDF FINAL FIX
+ * Unidades en el eje Y + Gráfico desplazado a la derecha
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -107,10 +108,15 @@ function updateChart(y1, y2, y3) {
         options: {
             responsive: true, maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: {
+                    beginAtZero: true,
+                    max: Math.round(initialMaxEnergy),
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
+                },
                 x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
-            plugins: { legend: { position: 'top', labels: { color: '#fff' } } }
+            plugins: { legend: { labels: { color: '#fff' } } }
         }
     });
 }
@@ -118,32 +124,39 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- CONFIGURACIÓN PARA PDF (EJES Y DATOS) ---
+// --- EL CAMBIO CRÍTICO PARA EL PDF ---
 window.onbeforeprint = () => {
-    // Forzamos texto negro puro para que sea visible en el PDF
+    // 1. Forzar color negro para ejes y etiquetas
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
     myChart.options.plugins.legend.labels.color = '#000000';
 
-    // Mostramos las líneas de los ejes para que se vea el marco del gráfico
-    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
-    myChart.options.scales.y.grid = { display: true, color: '#e5e5e5', lineWidth: 1 };
+    // 2. MOVER A LA DERECHA: Añadimos un padding exagerado a la izquierda del canvas
+    myChart.options.layout = { padding: { left: 80, right: 20, top: 20, bottom: 20 } };
 
-    myChart.options.plugins.legend.position = 'bottom';
+    // 3. AÑADIR UNIDADES (kWh) en el eje Y
+    myChart.options.scales.y.ticks.callback = function(value) {
+        return value.toLocaleString() + ' kWh';
+    };
+
+    // 4. Asegurar que las líneas de los ejes se vean
+    myChart.options.scales.x.grid = { display: true, color: '#000000' };
+    myChart.options.scales.y.grid = { display: true, color: '#cccccc' };
+
     myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.5;
+    myChart.options.aspectRatio = 2.2;
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Volvemos al estilo Matrix (Blanco)
+    // Restaurar estilo Matrix
+    myChart.options.layout = { padding: 0 };
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.plugins.legend.labels.color = '#ffffff';
+    myChart.options.scales.y.ticks.callback = function(value) { return value; };
     myChart.options.scales.x.grid = { display: false };
     myChart.options.scales.y.grid = { color: 'rgba(255,255,255,0.1)' };
-
-    myChart.options.plugins.legend.position = 'top';
     myChart.options.maintainAspectRatio = false;
     myChart.update();
 };
