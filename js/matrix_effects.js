@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FIXED ALIGNMENT & VISIBILITY
+ * ITB INFRASTRUCTURE AUDIT - PDF VISIBILITY FIX
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -118,10 +118,10 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- CONFIGURACIÓN PARA PDF (EJES Y POSICIÓN) ---
+// --- CONFIGURACIÓN PARA PDF (VISIBILIDAD TOTAL) ---
 window.onbeforeprint = () => {
-    // 1. Resetear el layout para que el gráfico use todo el ancho disponible por la izquierda
-    myChart.options.layout = { padding: { left: 0, right: 0, top: 10, bottom: 10 } };
+    // 1. Eliminar padding para tirar el gráfico a la izquierda
+    myChart.options.layout = { padding: 0 };
 
     // 2. FORZAR NEGRO PURO EN TEXTOS (Años y cifras)
     myChart.options.scales.x.ticks.color = '#000000';
@@ -129,24 +129,25 @@ window.onbeforeprint = () => {
 
     myChart.options.scales.y.ticks.color = '#000000';
     myChart.options.scales.y.ticks.font = { weight: 'bold', size: 11 };
+
+    // Añadimos unidades kWh visibles en el eje Y
     myChart.options.scales.y.ticks.callback = function(value) {
         return value.toLocaleString() + ' kWh';
     };
 
     myChart.options.plugins.legend.labels.color = '#000000';
 
-    // 3. Activar líneas de rejilla en gris oscuro para que se vean bien
-    myChart.options.scales.x.grid = { display: true, color: '#cccccc' };
-    myChart.options.scales.y.grid = { display: true, color: '#eeeeee' };
+    // 3. Activar líneas de rejilla oscuras para dar contexto
+    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
+    myChart.options.scales.y.grid = { display: true, color: '#dddddd', lineWidth: 1 };
 
     myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.4;
+    myChart.options.aspectRatio = 2.5;
     myChart.update();
 };
 
 window.onafterprint = () => {
     // Volver al estilo Matrix Web
-    myChart.options.layout = { padding: 0 };
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.plugins.legend.labels.color = '#ffffff';
