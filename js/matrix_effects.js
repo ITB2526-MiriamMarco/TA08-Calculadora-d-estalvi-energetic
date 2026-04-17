@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - JS COMPLETO
- * Cambios: Forzado de color negro en impresión y desplazamiento de ejes.
+ * ITB INFRASTRUCTURE AUDIT - JS DEFINITIVO
+ * Solución: Forzado de contraste negro y centrado de gráfico para PDF.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -128,9 +128,9 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- PARCHE CRÍTICO PARA PDF ---
+// --- PARCHE DE VISIBILIDAD PARA IMPRESIÓN ---
 window.onbeforeprint = () => {
-    // 1. Forzamos negro puro para que los datos sean legibles
+    // Forzamos negro puro en todos los textos para el PDF
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.x.ticks.font = { size: 14, weight: 'bold' };
 
@@ -141,25 +141,27 @@ window.onbeforeprint = () => {
     };
 
     myChart.options.plugins.legend.labels.color = '#000000';
+    myChart.options.plugins.legend.labels.font = { weight: 'bold' };
 
-    // 2. Activamos líneas de rejilla oscuras
-    myChart.options.scales.x.grid = { display: true, color: '#000000' };
-    myChart.options.scales.y.grid = { display: true, color: '#cccccc' };
+    // Líneas de cuadrícula visibles
+    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
+    myChart.options.scales.y.grid = { display: true, color: '#cccccc', lineWidth: 1 };
 
-    // 3. Desplazamiento interno para que los números no se corten
-    myChart.options.layout = { padding: { left: 30, right: 10, top: 10, bottom: 10 } };
+    // Centrado y márgenes internos
+    myChart.options.layout = { padding: { left: 10, right: 20, top: 10, bottom: 10 } };
 
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Restaurar estilo Matrix Web
+    // Restaurar modo Matrix (Web)
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.callback = function(value) { return value; };
     myChart.options.scales.x.grid = { display: false };
     myChart.options.scales.y.grid = { color: 'rgba(255,255,255,0.1)' };
     myChart.options.layout = { padding: 0 };
+    myChart.options.plugins.legend.labels.color = '#ffffff';
     myChart.update();
 };
 

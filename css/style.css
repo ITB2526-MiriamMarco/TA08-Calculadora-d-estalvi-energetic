@@ -16,7 +16,6 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 .config-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid var(--border-color); }
 .input-field { display: flex; flex-direction: column; gap: 8px; }
-.input-field label { color: var(--text-muted); font-size: 0.8rem; }
 .input-field input, .input-field select { background: #000; border: 1px solid var(--border-color); color: var(--primary-green); padding: 10px; border-radius: 4px; outline: none; }
 
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
@@ -40,34 +39,50 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
-/* --- SECCIÓN PDF --- */
+/* --- SECCIÓN IMPRESIÓN (PDF) --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
     .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
 
-    header { border-bottom: 2px solid black; }
+    header { border-bottom: 2px solid black; margin-bottom: 20px; }
     .green-tech { color: black !important; }
 
-    .dashboard-grid { display: block !important; }
-    .card { background: white !important; border: none !important; border-bottom: 1px solid #ddd !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 10px 0 !important; }
-    .data, .value { color: black !important; font-size: 1.1rem !important; }
+    .dashboard-grid { display: block !important; width: 100% !important; }
+    .card {
+        background: white !important;
+        border: none !important;
+        border-bottom: 1px solid #eee !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-bottom: 5px;
+        padding: 10px 0 !important;
+    }
+    .data { color: black !important; font-size: 1.1rem !important; }
 
+    /* CENTRADO DE GRÁFICOS */
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
         border: 1px solid #000 !important;
-        margin: 20px auto 140px auto !important;
-        padding: 20px 20px 20px 60px !important; /* Margen izquierdo para cifras Y */
-        width: 95% !important;
-        height: 400px !important;
+        margin: 20px auto 140px auto !important; /* Centrado con margen auto */
+        padding: 20px 20px 20px 60px !important; /* El 60px a la izquierda es para que se vean los datos del eje Y */
+        width: 90% !important; /* Un poco más estrecho para centrar mejor */
+        height: 450px !important;
+        page-break-inside: avoid;
     }
 
-    .chart-box { height: 100% !important; width: 100% !important; }
+    .chart-box {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 auto !important;
+    }
 
     .financial-summary {
         display: block !important;
         border: 2px solid black !important;
         background: #f9f9f9 !important;
-        margin-top: 80px !important;
+        margin: 80px auto 0 auto !important;
+        width: 90% !important;
     }
+    .value { color: black !important; }
 }
