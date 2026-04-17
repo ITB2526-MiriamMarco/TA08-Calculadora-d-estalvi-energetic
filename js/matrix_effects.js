@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - JS FINAL (DEFINITIVO)
- * Solución: Datos visibles en PDF + Sin desbordamiento inferior.
+ * ITB INFRASTRUCTURE AUDIT - JS COMPLETO
+ * Incluye lógica de cálculo y parche de visibilidad para PDF.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -128,37 +128,25 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- AJUSTES ESPECÍFICOS PARA PDF (onbeforeprint) ---
+// --- EVENTOS DE IMPRESIÓN ---
 window.onbeforeprint = () => {
-    // 1. Forzamos Negro Puro en los textos (Peso máximo para legibilidad)
     myChart.options.scales.x.ticks.color = '#000000';
-    myChart.options.scales.x.ticks.font = { size: 14, weight: '900' };
-
+    myChart.options.scales.x.ticks.font = { size: 12, weight: 'bold' };
     myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.scales.y.ticks.font = { size: 11, weight: 'bold' };
-
-    // 2. Activamos líneas de cierre negras
-    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 2 };
-    myChart.options.scales.y.grid = { display: true, color: '#000000', lineWidth: 1 };
-
+    myChart.options.scales.y.ticks.font = { size: 10, weight: 'bold' };
+    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
+    myChart.options.scales.y.grid = { display: true, color: '#e0e0e0', lineWidth: 1 };
     myChart.options.plugins.legend.labels.color = '#000000';
-
-    // 3. Quitar todos los paddings que "comen" espacio y provocan desbordamiento
-    myChart.options.layout = { padding: 0 };
-
-    // 4. Bloquear proporción para que no se estire hacia abajo
-    myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.5;
-
+    myChart.options.layout = { padding: { left: 40, right: 20, top: 10, bottom: 10 } };
+    myChart.options.maintainAspectRatio = false;
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Restaurar modo Web Matrix
-    myChart.options.maintainAspectRatio = false;
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.scales.x.grid = { display: false };
+    myChart.options.layout = { padding: 0 };
     myChart.update();
 };
 

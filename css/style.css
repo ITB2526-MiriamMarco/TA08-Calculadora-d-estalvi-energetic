@@ -39,41 +39,23 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
-/* --- SECCIÓN IMPRESIÓN (PDF) --- */
+/* --- SECCIÓN IMPRESIÓN --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
     .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
-
-    header { border-bottom: 2px solid black; margin-bottom: 20px; }
-    .green-tech { color: black !important; }
-
-    .dashboard-grid { display: block !important; width: 100% !important; }
-    .card { background: white !important; border: none !important; border-bottom: 1px solid #eee !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 10px 0 !important; }
-    .data { color: black !important; font-size: 1rem !important; }
-
-    /* POSICIONAMIENTO HACIA LA IZQUIERDA Y SIN DESBORDAMIENTO INFERIOR */
+    .wrapper { max-width: 100%; margin: 0; }
+    header { border-bottom: 2px solid black; }
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
-        border: 2px solid #000 !important;
-        margin: 20px 0 150px 0 !important; /* Margen 0 a la izquierda para pegar a la izquierda */
-        padding: 20px 10px 10px 70px !important; /* Espacio extra a la izquierda para ver los números Y */
+        border: 1px solid #000 !important;
+        margin: 20px 0 !important;
+        padding: 0 !important;
         width: 100% !important;
-        height: 400px !important; /* Altura controlada del recuadro */
-        overflow: hidden !important; /* Bloquea cualquier cosa que intente salir */
+        height: 350px !important;
+        page-break-inside: avoid;
     }
-
-    .chart-box {
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-    }
-
-    .financial-summary {
-        display: block !important;
-        border: 2px solid black !important;
-        background: #f9f9f9 !important;
-        margin-top: 100px !important;
-        width: 100% !important;
-    }
+    .chart-box { width: 100% !important; height: 100% !important; }
+    .financial-summary { border: 1px solid black !important; background: #f9f9f9 !important; margin-top: 20px !important; padding: 15px !important; }
+    .data, .value { color: black !important; }
 }
