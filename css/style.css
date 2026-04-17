@@ -4,82 +4,71 @@
     --card-bg: #141414;
     --border-color: #262626;
     --text-main: #e5e5e5;
+    --text-muted: #a3a3a3;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 body { background-color: var(--dark-bg); color: var(--text-main); padding: 20px; }
 .wrapper { max-width: 1200px; margin: 0 auto; }
 
-/* RECUADROS WEB (GRID) */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-}
+header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 30px; }
+.green-tech { color: var(--primary-green); text-transform: uppercase; font-weight: bold; }
 
-.card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-}
+.config-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid var(--border-color); }
+.input-field { display: flex; flex-direction: column; gap: 8px; }
+.input-field label { color: var(--text-muted); font-size: 0.8rem; }
+.input-field input, .input-field select { background: #000; border: 1px solid var(--border-color); color: var(--primary-green); padding: 10px; border-radius: 4px; outline: none; }
 
-.card h3 { font-size: 0.95rem; color: var(--primary-green); margin-bottom: 12px; }
-.data { font-size: 1.5rem; font-weight: bold; color: #fff; font-family: monospace; }
-.unit { font-size: 0.8rem; color: #a3a3a3; margin-left: 5px; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
+.card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
+.data { font-size: 1.4rem; font-weight: bold; color: #fff; font-family: monospace; }
+.unit { font-size: 0.8rem; color: var(--text-muted); margin-left: 5px; }
 
-/* GRÁFICA WEB: CENTRADA Y GRANDE */
-.chart-container-wrapper {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 30px;
-    margin: 40px 0;
-    height: 500px;
-    width: 100%;
-}
-
-.financial-summary { background: #000; border: 2px solid var(--primary-green); border-radius: 12px; padding: 30px; margin-top: 40px; }
-
-.btn-action { background: #1a1a1a; border: 1px solid var(--border-color); color: #888; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; margin-top: 10px; }
+.btn-action { background: transparent; border: 1px solid var(--border-color); color: #a3a3a3; padding: 5px 8px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; margin-top: 10px; }
 .btn-action.active-btn { background: var(--primary-green) !important; color: #000 !important; font-weight: bold; }
 
-/* --- AJUSTES PARA EL PDF (Solo cuando se imprime o exporta) --- */
+.chart-container-wrapper { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 30px; height: 500px; }
+.chart-box { height: 100%; width: 100%; }
+
+.financial-summary { background: #000; border: 2px solid var(--primary-green); border-radius: 12px; padding: 30px; margin-bottom: 30px; }
+.summary-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; text-align: center; }
+.value { font-size: 2rem; font-weight: bold; color: #fff; }
+
+.strategy-panel { display: flex; justify-content: center; gap: 20px; margin: 40px 0; }
+.btn-primary { background: var(--primary-green); color: #000; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-outline { background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
+
+/* --- PDF PRINT OVERWRITE --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
-    .config-bar, .strategy-panel, .btn-action, footer { display: none !important; }
-
-    /* En el PDF los recuadros se convierten en filas de lista */
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
+    header { border-bottom: 2px solid black; }
+    .green-tech { color: black !important; }
     .dashboard-grid { display: block !important; }
-    .card {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        border: none !important;
-        border-bottom: 1px solid #ddd !important;
-        background: white !important;
-        padding: 10px 0 !important;
-        border-radius: 0 !important;
-    }
-    .card h3, .data, .unit, .target-val { color: black !important; }
-    .target-info { border: none !important; padding: 0 !important; }
+    .card { background: white !important; border: none !important; border-bottom: 1px solid #eee !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 8px 0 !important; }
+    .data { color: black !important; font-size: 1rem !important; }
 
     .chart-container-wrapper {
+        display: block !important;
+        position: relative !important;
         background: white !important;
-        border: 1px solid black !important;
-        height: 400px !important;
-        margin-top: 30px !important;
-        padding: 10px !important;
+        border: 1px solid #ccc !important;
+        margin: 40px 0 160px 0 !important; /* Margen inferior muy alto para evitar el solape de la primera foto */
+        padding: 20px !important;
+        height: auto !important;
+        clear: both !important;
     }
+    .chart-box { height: 380px !important; display: block !important; position: relative !important; }
 
     .financial-summary {
+        display: block !important;
+        clear: both !important;
         border: 2px solid black !important;
         background: #f9f9f9 !important;
-        margin-top: 50px !important;
-        color: black !important;
+        margin-top: 80px !important; /* Separación extra respecto al gráfico */
+        position: relative !important;
     }
     .value { color: black !important; }
 }

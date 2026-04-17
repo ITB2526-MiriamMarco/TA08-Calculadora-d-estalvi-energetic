@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - JS FINAL
+ * ITB INFRASTRUCTURE AUDIT - FIXED AXIS VERSION
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -75,16 +75,8 @@ function runCalculations() {
         grid.innerHTML += `
             <div class="card">
                 <h3>${m.icon} ${m.title}</h3>
-                <div class="data-row">
-                    <span class="data">${Math.round(m.val).toLocaleString()}</span>
-                    <span class="unit">${m.unit}</span>
-                </div>
-                <div class="target-info">
-                    <span class="target-label">Target:</span>
-                    <span class="target-val" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">
-                        ${Math.round(m.goal).toLocaleString()} ${m.unit}
-                    </span>
-                </div>
+                <span class="data">${Math.round(m.val).toLocaleString()}</span><span class="unit">${m.unit}</span>
+                <div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">Target: ${Math.round(m.goal).toLocaleString()} ${m.unit}</div>
                 <div class="card-actions">${TECH_POLICIES.filter(p => p.category === m.title).map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("")}</div>
             </div>`;
     });
@@ -99,8 +91,6 @@ function runCalculations() {
 
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
-    const isPrinting = document.body.classList.contains('printing');
-
     if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'bar',
@@ -109,47 +99,51 @@ function updateChart(y1, y2, y3) {
             datasets: [{
                 label: 'Projected Consumption (kWh)',
                 data: [Math.round(y1), Math.round(y2), Math.round(y3)],
-                backgroundColor: isPrinting ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 0.4)',
+                backgroundColor: 'rgba(34, 197, 94, 0.4)',
                 borderColor: '#22c55e',
                 borderWidth: 2
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { left: 60, right: 20, top: 10, bottom: 10 } },
+            responsive: true, maintainAspectRatio: false,
             scales: {
-                y: {
-                    beginAtZero: true,
-                    max: Math.round(initialMaxEnergy),
-                    ticks: { color: isPrinting ? '#000' : '#fff', font: { weight: 'bold' } },
-                    grid: { color: isPrinting ? '#ddd' : 'rgba(255,255,255,0.1)' }
-                },
-                x: {
-                    ticks: { color: isPrinting ? '#000' : '#fff' },
-                    grid: { display: false }
-                }
+                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
-            plugins: {
-                legend: { labels: { color: isPrinting ? '#000' : '#fff' } }
-            }
+            plugins: { legend: { position: 'top', labels: { color: '#fff' } } }
         }
     });
 }
 
-// ESTA ES LA FUNCIÓN QUE DEBE LLAMAR TU BOTÓN "Export PDF"
-function exportPDF() {
-    document.body.classList.add('printing');
-    runCalculations(); // Cambia colores a modo impresión
-
-    setTimeout(() => {
-        window.print();
-        document.body.classList.remove('printing');
-        runCalculations(); // Devuelve colores Matrix
-    }, 300);
-}
-
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
+
+// --- EL FIX CLAVE PARA LOS EJES ---
+window.onbeforeprint = () => {
+    // Forzamos negro para que se vea en el papel blanco
+    myChart.options.scales.x.ticks.color = '#000000';
+    myChart.options.scales.y.ticks.color = '#000000';
+    myChart.options.plugins.legend.labels.color = '#000000';
+
+    // Cambiamos la rejilla a un gris suave para que no sea invisible
+    myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+
+    myChart.options.plugins.legend.position = 'bottom';
+    myChart.options.maintainAspectRatio = true;
+    myChart.options.aspectRatio = 2.8;
+    myChart.update();
+};
+
+window.onafterprint = () => {
+    // Restauramos el modo Matrix (Blanco sobre negro)
+    myChart.options.scales.x.ticks.color = '#ffffff';
+    myChart.options.scales.y.ticks.color = '#ffffff';
+    myChart.options.plugins.legend.labels.color = '#ffffff';
+    myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+
+    myChart.options.plugins.legend.position = 'top';
+    myChart.options.maintainAspectRatio = false;
+    myChart.update();
+};
 
 window.onload = runCalculations;
