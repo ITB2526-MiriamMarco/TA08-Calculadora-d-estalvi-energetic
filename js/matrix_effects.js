@@ -1,5 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - JS DEFINITIVO (FIX VISIBILIDAD)
+ * ITB INFRASTRUCTURE AUDIT - JS FINAL (DEFINITIVO)
+ * Solución: Datos visibles en PDF + Sin desbordamiento inferior.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -127,33 +128,37 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- SOLUCIÓN DE IMPRESIÓN ---
+// --- AJUSTES ESPECÍFICOS PARA PDF (onbeforeprint) ---
 window.onbeforeprint = () => {
-    // Forzamos el color NEGRO en las fuentes para que se vean en el PDF
+    // 1. Forzamos Negro Puro en los textos (Peso máximo para legibilidad)
     myChart.options.scales.x.ticks.color = '#000000';
-    myChart.options.scales.x.ticks.font = { size: 14, weight: 'bold' };
+    myChart.options.scales.x.ticks.font = { size: 14, weight: '900' };
 
     myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.scales.y.ticks.font = { size: 12, weight: 'bold' };
+    myChart.options.scales.y.ticks.font = { size: 11, weight: 'bold' };
 
-    // Añadimos las líneas de rejilla en negro para ver los límites
-    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
-    myChart.options.scales.y.grid = { display: true, color: '#dddddd', lineWidth: 1 };
+    // 2. Activamos líneas de cierre negras
+    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 2 };
+    myChart.options.scales.y.grid = { display: true, color: '#000000', lineWidth: 1 };
 
     myChart.options.plugins.legend.labels.color = '#000000';
 
-    // Eliminamos paddings que empujan el gráfico
-    myChart.options.layout = { padding: { left: 5, right: 5, top: 10, bottom: 0 } };
+    // 3. Quitar todos los paddings que "comen" espacio y provocan desbordamiento
+    myChart.options.layout = { padding: 0 };
+
+    // 4. Bloquear proporción para que no se estire hacia abajo
+    myChart.options.maintainAspectRatio = true;
+    myChart.options.aspectRatio = 2.5;
 
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Restaurar a modo Web
+    // Restaurar modo Web Matrix
+    myChart.options.maintainAspectRatio = false;
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
     myChart.options.scales.x.grid = { display: false };
-    myChart.options.layout = { padding: 0 };
     myChart.update();
 };
 

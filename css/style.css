@@ -39,7 +39,7 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
-/* --- AJUSTES PDF DEFINITIVOS --- */
+/* --- SECCIÓN IMPRESIÓN (PDF) --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
     .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
@@ -48,17 +48,19 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
     .green-tech { color: black !important; }
 
     .dashboard-grid { display: block !important; width: 100% !important; }
-    .card { background: white !important; border: none !important; border-bottom: 1px solid #ddd !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 10px 0 !important; }
+    .card { background: white !important; border: none !important; border-bottom: 1px solid #eee !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 10px 0 !important; }
     .data { color: black !important; font-size: 1rem !important; }
 
+    /* POSICIONAMIENTO HACIA LA IZQUIERDA Y SIN DESBORDAMIENTO INFERIOR */
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
         border: 2px solid #000 !important;
-        margin: 20px 0 150px 0 !important; /* Quitamos margen horizontal para que pegue a la izquierda */
-        padding: 10px 10px 10px 50px !important; /* El 50px de la izquierda es para dejar espacio a las cifras */
+        margin: 20px 0 150px 0 !important; /* Margen 0 a la izquierda para pegar a la izquierda */
+        padding: 20px 10px 10px 70px !important; /* Espacio extra a la izquierda para ver los números Y */
         width: 100% !important;
-        height: 400px !important;
+        height: 400px !important; /* Altura controlada del recuadro */
+        overflow: hidden !important; /* Bloquea cualquier cosa que intente salir */
     }
 
     .chart-box {
@@ -74,5 +76,4 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         margin-top: 100px !important;
         width: 100% !important;
     }
-    .value { color: black !important; }
 }
