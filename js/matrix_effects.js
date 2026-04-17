@@ -1,6 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - PDF DEFINITIVE FIX
- * Desplazamiento de columnas y unidades visibles en PDF
+ * ITB INFRASTRUCTURE AUDIT - FIXED ALIGNMENT & VISIBILITY
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -119,32 +118,34 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- PARCHE PARA EL PDF ---
+// --- CONFIGURACIÓN PARA PDF (EJES Y POSICIÓN) ---
 window.onbeforeprint = () => {
-    // 1. Movemos el gráfico a la derecha añadiendo un padding interno muy grande a la izquierda
-    myChart.options.layout = { padding: { left: 100, right: 30, top: 20, bottom: 20 } };
+    // 1. Resetear el layout para que el gráfico use todo el ancho disponible por la izquierda
+    myChart.options.layout = { padding: { left: 0, right: 0, top: 10, bottom: 10 } };
 
-    // 2. Forzamos que los números de los ejes sean negros y visibles
+    // 2. FORZAR NEGRO PURO EN TEXTOS (Años y cifras)
     myChart.options.scales.x.ticks.color = '#000000';
-    myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.plugins.legend.labels.color = '#000000';
+    myChart.options.scales.x.ticks.font = { weight: 'bold', size: 12 };
 
-    // 3. Unidades en el eje Y
+    myChart.options.scales.y.ticks.color = '#000000';
+    myChart.options.scales.y.ticks.font = { weight: 'bold', size: 11 };
     myChart.options.scales.y.ticks.callback = function(value) {
         return value.toLocaleString() + ' kWh';
     };
 
-    // 4. Dibujamos las líneas de los ejes para que haya contexto visual
-    myChart.options.scales.x.grid = { display: true, color: '#000000', drawTicks: true };
-    myChart.options.scales.y.grid = { display: true, color: '#e0e0e0' };
+    myChart.options.plugins.legend.labels.color = '#000000';
+
+    // 3. Activar líneas de rejilla en gris oscuro para que se vean bien
+    myChart.options.scales.x.grid = { display: true, color: '#cccccc' };
+    myChart.options.scales.y.grid = { display: true, color: '#eeeeee' };
 
     myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.0;
+    myChart.options.aspectRatio = 2.4;
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Volver al modo web
+    // Volver al estilo Matrix Web
     myChart.options.layout = { padding: 0 };
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';

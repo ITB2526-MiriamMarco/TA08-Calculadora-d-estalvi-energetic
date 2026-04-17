@@ -39,35 +39,41 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
-/* --- AJUSTES IMPRESIÓN --- */
+/* --- PDF PRINT OVERWRITE (FIX POSICIÓN Y VISIBILIDAD) --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
     .config-bar, .strategy-panel, .btn-action, .card-actions, footer { display: none !important; }
+
     header { border-bottom: 2px solid black; }
+    .green-tech { color: black !important; }
 
     .dashboard-grid { display: block !important; }
     .card { background: white !important; border: none !important; border-bottom: 1px solid #eee !important; display: flex !important; justify-content: space-between !important; margin-bottom: 5px; padding: 8px 0 !important; }
-    .data, .value { color: black !important; font-size: 1.1rem !important; }
+    .data { color: black !important; font-size: 1rem !important; }
 
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
-        border: none !important;
-        margin: 40px 0 160px 0 !important;
-        padding-left: 50px !important; /* Margen extra para los números del eje */
+        border: 1px solid #ddd !important;
+        margin: 20px 0 140px 0 !important;
+        padding: 10px !important; /* Reducimos padding para que el gráfico use todo el ancho hacia la izquierda */
         width: 100% !important;
         height: auto !important;
+        clear: both !important;
     }
 
     .chart-box {
-        height: 450px !important;
+        height: 400px !important;
         width: 100% !important;
+        margin-left: 0 !important; /* Forzamos pegado a la izquierda */
     }
 
     .financial-summary {
         display: block !important;
+        clear: both !important;
         border: 2px solid black !important;
         background: #f9f9f9 !important;
-        margin-top: 100px !important;
+        margin-top: 80px !important;
     }
+    .value { color: black !important; }
 }
