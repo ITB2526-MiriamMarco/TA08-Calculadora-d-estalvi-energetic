@@ -1,5 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - PDF VISIBILITY FIX
+ * ITB INFRASTRUCTURE AUDIT - JS COMPLETO
+ * Cambios: Forzado de color negro en impresión y desplazamiento de ejes.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -105,12 +106,21 @@ function updateChart(y1, y2, y3) {
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                x: { ticks: { color: '#fff' }, grid: { display: false } }
+                y: {
+                    beginAtZero: true,
+                    max: Math.round(initialMaxEnergy),
+                    ticks: { color: '#ffffff' },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
+                },
+                x: {
+                    ticks: { color: '#ffffff' },
+                    grid: { display: false }
+                }
             },
-            plugins: { legend: { labels: { color: '#fff' } } }
+            plugins: { legend: { labels: { color: '#ffffff' } } }
         }
     });
 }
@@ -118,43 +128,38 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- CONFIGURACIÓN PARA PDF (VISIBILIDAD TOTAL) ---
+// --- PARCHE CRÍTICO PARA PDF ---
 window.onbeforeprint = () => {
-    // 1. Eliminar padding para tirar el gráfico a la izquierda
-    myChart.options.layout = { padding: 0 };
-
-    // 2. FORZAR NEGRO PURO EN TEXTOS (Años y cifras)
+    // 1. Forzamos negro puro para que los datos sean legibles
     myChart.options.scales.x.ticks.color = '#000000';
-    myChart.options.scales.x.ticks.font = { weight: 'bold', size: 12 };
+    myChart.options.scales.x.ticks.font = { size: 14, weight: 'bold' };
 
     myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.scales.y.ticks.font = { weight: 'bold', size: 11 };
-
-    // Añadimos unidades kWh visibles en el eje Y
+    myChart.options.scales.y.ticks.font = { size: 12, weight: 'bold' };
     myChart.options.scales.y.ticks.callback = function(value) {
         return value.toLocaleString() + ' kWh';
     };
 
     myChart.options.plugins.legend.labels.color = '#000000';
 
-    // 3. Activar líneas de rejilla oscuras para dar contexto
-    myChart.options.scales.x.grid = { display: true, color: '#000000', lineWidth: 1 };
-    myChart.options.scales.y.grid = { display: true, color: '#dddddd', lineWidth: 1 };
+    // 2. Activamos líneas de rejilla oscuras
+    myChart.options.scales.x.grid = { display: true, color: '#000000' };
+    myChart.options.scales.y.grid = { display: true, color: '#cccccc' };
 
-    myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.5;
+    // 3. Desplazamiento interno para que los números no se corten
+    myChart.options.layout = { padding: { left: 30, right: 10, top: 10, bottom: 10 } };
+
     myChart.update();
 };
 
 window.onafterprint = () => {
-    // Volver al estilo Matrix Web
+    // Restaurar estilo Matrix Web
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
-    myChart.options.plugins.legend.labels.color = '#ffffff';
     myChart.options.scales.y.ticks.callback = function(value) { return value; };
     myChart.options.scales.x.grid = { display: false };
     myChart.options.scales.y.grid = { color: 'rgba(255,255,255,0.1)' };
-    myChart.options.maintainAspectRatio = false;
+    myChart.options.layout = { padding: 0 };
     myChart.update();
 };
 
