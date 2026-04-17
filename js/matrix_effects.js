@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - JS FINAL
- * Mantiene los 8 cálculos y corrige la visualización en PDF.
+ * ITB INFRASTRUCTURE AUDIT - JS FINAL UNIFICADO
+ * Mantiene los 8 cálculos, diseño de tarjetas y parche de impresión.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -58,8 +58,6 @@ function runCalculations() {
     updateChart(y1, y2, y3);
 
     const expM = selectedMode/30;
-
-    // AQUÍ ESTÁN LOS 8 CÁLCULOS QUE SOLICITASTE
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
@@ -77,19 +75,21 @@ function runCalculations() {
         const isAchieved = m.val <= m.goal;
         grid.innerHTML += `
             <div class="card">
-                <div class="card-left">
-                    <h3>${m.icon} ${m.title}</h3>
-                    <div class="data-group">
-                        <span class="data">${Math.round(m.val).toLocaleString()}</span>
-                        <span class="unit">${m.unit}</span>
-                    </div>
+                <h3>${m.icon} ${m.title}</h3>
+                <div class="data-row">
+                    <span class="data">${Math.round(m.val).toLocaleString()}</span>
+                    <span class="unit">${m.unit}</span>
                 </div>
-                <div class="card-right">
+                <div class="target-info">
                     <span class="target-label">Target:</span>
                     <span class="target-val" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">
                         ${Math.round(m.goal).toLocaleString()} ${m.unit}
                     </span>
-                    <div class="card-actions">${TECH_POLICIES.filter(p => p.category === m.title).map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("")}</div>
+                </div>
+                <div class="card-actions">
+                    ${TECH_POLICIES.filter(p => p.category === m.title).map(btn =>
+                        `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`
+                    ).join("")}
                 </div>
             </div>`;
     });
@@ -120,19 +120,17 @@ function updateChart(y1, y2, y3) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: { left: 60, right: 30, top: 20, bottom: 20 } },
             scales: {
                 y: {
                     beginAtZero: true,
                     max: Math.round(initialMaxEnergy),
-                    ticks: { color: '#ffffff' },
+                    ticks: { color: '#ffffff', font: { weight: 'bold' } },
                     grid: { color: 'rgba(255,255,255,0.1)' }
                 },
-                x: {
-                    ticks: { color: '#ffffff' },
-                    grid: { display: false }
-                }
+                x: { ticks: { color: '#ffffff' }, grid: { display: false } }
             },
-            plugins: { legend: { labels: { color: '#ffffff' } } }
+            plugins: { legend: { labels: { color: '#ffffff', padding: 20 } } }
         }
     });
 }
@@ -140,20 +138,18 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- PARCHE IMPRESIÓN ---
+// --- EVENTOS DE IMPRESIÓN ---
 window.onbeforeprint = () => {
     myChart.options.scales.x.ticks.color = '#000000';
     myChart.options.scales.y.ticks.color = '#000000';
     myChart.options.scales.x.grid = { display: true, color: '#000000' };
     myChart.options.plugins.legend.labels.color = '#000000';
-    myChart.options.layout = { padding: { left: 60, right: 10, top: 10, bottom: 10 } };
     myChart.update();
 };
 
 window.onafterprint = () => {
     myChart.options.scales.x.ticks.color = '#ffffff';
     myChart.options.scales.y.ticks.color = '#ffffff';
-    myChart.options.layout = { padding: 0 };
     myChart.update();
 };
 
