@@ -147,3 +147,21 @@ window.onafterprint = () => {
 };
 
 window.onload = runCalculations;
+// Función para disparar la exportación correctamente
+function exportPDF() {
+    // 1. Añadimos clase de impresión para que el JS sepa que debe cambiar colores
+    document.body.classList.add('printing');
+
+    // 2. Refrescamos cálculos y gráfica con colores negros
+    if (typeof runCalculations === "function") {
+        runCalculations();
+    }
+
+    // 3. Pequeño tiempo de espera para que la gráfica se dibuje antes de imprimir
+    setTimeout(() => {
+        window.print();
+        // 4. Volvemos al modo Matrix (web)
+        document.body.classList.remove('printing');
+        runCalculations();
+    }, 500);
+}
