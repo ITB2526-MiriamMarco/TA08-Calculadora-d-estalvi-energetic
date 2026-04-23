@@ -115,3 +115,48 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         padding-top: 25px !important; /* Da espacio para que quepa el número de la barra más alta */
     }
 }
+/* --- RESPONSIVE DESIGN --- */
+
+/* 1. Ajuste del Grid de tarjetas */
+.dashboard-grid {
+    display: grid;
+    /* Esto hace que si no caben 260px, salte de línea automáticamente */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
+    width: 100%;
+}
+
+/* 2. Ajuste para pantallas pequeñas (Móviles) */
+@media (max-width: 600px) {
+    body {
+        padding: 10px; /* Menos margen en móviles */
+    }
+
+    header {
+        flex-direction: column; /* Logo y Status uno encima de otro */
+        text-align: center;
+        gap: 10px;
+    }
+
+    .config-bar {
+        grid-template-columns: 1fr; /* Los inputs ocupan todo el ancho */
+    }
+
+    .chart-container-wrapper {
+        height: 350px; /* Gráfica un poco más pequeña en móvil para que no ocupe toda la pantalla */
+        padding: 10px;
+    }
+
+    .value {
+        font-size: 1.5rem; /* Números de dinero un poco más pequeños */
+    }
+
+    .btn-primary, .btn-outline {
+        width: 100%; /* Botones grandes fáciles de pulsar con el dedo */
+        margin-bottom: 10px;
+    }
+
+    .strategy-panel {
+        flex-direction: column;
+    }
+}

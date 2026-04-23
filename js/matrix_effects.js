@@ -118,66 +118,23 @@ function updateChart(y1, y2, y3) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- EL FIX CLAVE PARA LOS EJES ---
-window.onbeforeprint = () => {
-    // Forzamos negro para que se vea en el papel blanco
-    myChart.options.scales.x.ticks.color = '#000000';
-    myChart.options.scales.y.ticks.color = '#000000';
-    myChart.options.plugins.legend.labels.color = '#000000';
-
-    // Cambiamos la rejilla a un gris suave para que no sea invisible
-    myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
-
-    myChart.options.plugins.legend.position = 'bottom';
-    myChart.options.maintainAspectRatio = true;
-    myChart.options.aspectRatio = 2.8;
-    myChart.update();
-};
-
-window.onafterprint = () => {
-    // Restauramos el modo Matrix (Blanco sobre negro)
-    myChart.options.scales.x.ticks.color = '#ffffff';
-    myChart.options.scales.y.ticks.color = '#ffffff';
-    myChart.options.plugins.legend.labels.color = '#ffffff';
-    myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
-
-    myChart.options.plugins.legend.position = 'top';
-    myChart.options.maintainAspectRatio = false;
-    myChart.update();
-};
-// Este bloque solo actúa cuando pulsas imprimir, no toca nada de la web
+/**
+ * LOGICA UNIFICADA DE IMPRESION (PDF)
+ */
 window.onbeforeprint = () => {
     if (myChart) {
-        // Forzamos ejes negros para el papel
+        // Colores para papel blanco (Negro)
         myChart.options.scales.x.ticks.color = '#000000';
         myChart.options.scales.y.ticks.color = '#000000';
         myChart.options.plugins.legend.labels.color = '#000000';
-        myChart.update();
-    }
-};
-
-window.onafterprint = () => {
-    if (myChart) {
-        // Devolvemos los ejes a blanco para el modo Matrix
-        myChart.options.scales.x.ticks.color = '#ffffff';
-        myChart.options.scales.y.ticks.color = '#ffffff';
-        myChart.options.plugins.legend.labels.color = '#ffffff';
-        myChart.update();
-    }
-};
-// Añade esto al final de tu script actual
-window.onbeforeprint = () => {
-    if (myChart) {
-        // 1. Colores de texto para el PDF (Negro)
-        myChart.options.scales.x.ticks.color = '#000000';
-        myChart.options.scales.y.ticks.color = '#000000';
-        myChart.options.plugins.legend.labels.color = '#000000';
-
-        // 2. Rejilla suave (lo que pediste)
         myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
-        myChart.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
 
-        // 3. Forzar que se vean los valores sobre las barras en el PDF
+        // Ajustes de posicion y layout
+        myChart.options.plugins.legend.position = 'bottom';
+        myChart.options.maintainAspectRatio = true;
+        myChart.options.aspectRatio = 2.8;
+
+        // Mostrar datos numéricos sobre las barras
         myChart.options.animation = {
             duration: 0,
             onComplete: function() {
@@ -185,7 +142,7 @@ window.onbeforeprint = () => {
                 ctx.font = 'bold 12px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
-                ctx.fillStyle = '#000'; // Color de los números en el PDF
+                ctx.fillStyle = '#000';
 
                 this.data.datasets.forEach(function(dataset, i) {
                     const meta = myChart.getDatasetMeta(i);
@@ -196,26 +153,25 @@ window.onbeforeprint = () => {
                 });
             }
         };
-
         myChart.update();
     }
 };
 
 window.onafterprint = () => {
     if (myChart) {
-        // Restaurar modo Matrix (Blanco)
+        // Restaurar modo Matrix (Blanco sobre negro)
         myChart.options.scales.x.ticks.color = '#ffffff';
         myChart.options.scales.y.ticks.color = '#ffffff';
         myChart.options.plugins.legend.labels.color = '#ffffff';
-
-        // Restaurar rejilla Matrix
         myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
-        myChart.options.scales.x.grid.color = 'transparent';
 
-        // Quitar los números fijos para que la web siga limpia
+        // Restaurar layout original
+        myChart.options.plugins.legend.position = 'top';
+        myChart.options.maintainAspectRatio = false;
         myChart.options.animation = { duration: 1000 };
 
         myChart.update();
     }
 };
+
 window.onload = runCalculations;
