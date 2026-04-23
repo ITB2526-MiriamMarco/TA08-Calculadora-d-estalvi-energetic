@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FINAL PRODUCTION VERSION
- * Seasonal logic + Critical Infra + Original PDF Export
+ * ITB INFRASTRUCTURE AUDIT - PROFESSIONAL TECH VERSION
+ * Features: Seasonal consumption, 24/7 Critical Infra, and Incompressible Floor.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -17,7 +17,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Nubulet 24/7
+const CRITICAL_INFRA_WATTAGE = 550; // Nubulet y Core Red (Inmune a políticas)
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -55,11 +55,11 @@ function runCalculations() {
     const totalPeriodDays = (schoolDays >= 175) ? 365 : 30;
     const idleDays = totalPeriodDays - schoolDays;
 
-    // --- 2. ENERGÍA BASE ---
+    // --- 2. ENERGÍA BASE (Cálculo sin ahorros) ---
     const standbyBase = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
     const infraFixed = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
     const activeBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
-    const baseEnergy = activeBase + standbyBase + infraFixed;
+    const baseEnergyTotal = activeBase + standbyBase + infraFixed;
 
     // --- 3. AGUA ---
     let currentPax = occupancy;
@@ -70,26 +70,33 @@ function runCalculations() {
     }
     const baseWater = (currentPax * INFRA_DATA.water.fixedDailyPerPax * waterDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
 
-    // --- 4. AHORROS ---
+    // --- 4. AHORROS PROTEGIDOS (SUELO TECNOLÓGICO) ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
-    const currEnergy = baseEnergy * (1 - savings.energy);
-    const currWater = baseWater * (1 - savings.water);
+    // Aplicamos un límite: no se puede ahorrar más del 70% del consumo variable
+    // El infraFixed (Nubulet) es intocable (0% ahorro)
+    const energySavingFactor = Math.min(savings.energy, 0.70);
+
+    const currEnergy = (activeBase * (1 - energySavingFactor)) +
+                       (standbyBase * (1 - (energySavingFactor * 0.6))) +
+                       infraFixed; // Base fija siempre se suma
+
+    const currWater = Math.max(baseWater * 0.30, baseWater * (1 - savings.water));
 
     // --- 5. ACTUALIZACIÓN INTERFAZ ---
-    updateChart(energySavingsValue());
+    updateChart(energySavingFactor);
 
     const expM = (schoolDays >= 175) ? 12 : 1;
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
-        { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
-        { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍" },
+        { title: "System Energy Load", val: currEnergy, goal: baseEnergyTotal * 0.75, unit: "kWh", icon: "🖥️" },
+        { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergyTotal * 0.75) * CO2_FACTOR, unit: "kg", icon: "🌍" },
         { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * expM) * 0.7, unit: "€", icon: "🛠️" },
         { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * expM) * 0.7, unit: "€", icon: "📦" },
-        { title: "Standby Consumption", val: (standbyBase + infraFixed) * (1 - (savings.energy * 0.8)), goal: (standbyBase + infraFixed) * 0.5, unit: "kWh", icon: "🌙" },
-        { title: "Wasted Energy", val: (baseEnergy * 0.25) * (1 - savings.energy), goal: (baseEnergy * 0.05), unit: "kWh", icon: "⚠️" },
-        { title: `Next Year Forecast`, val: currEnergy * 1.22, goal: (baseEnergy * 0.7) * 1.22, unit: "kWh", icon: "📈" }
+        { title: "Standby Consumption", val: (standbyBase * (1 - (energySavingFactor * 0.6))) + infraFixed, goal: (standbyBase + infraFixed) * 0.6, unit: "kWh", icon: "🌙" },
+        { title: "Wasted Energy", val: Math.max(baseEnergyTotal * 0.05, (baseEnergyTotal * 0.25) * (1 - energySavingFactor)), goal: (baseEnergyTotal * 0.08), unit: "kWh", icon: "⚠️" },
+        { title: `Next Year Forecast`, val: currEnergy * 1.22, goal: (baseEnergyTotal * 0.75) * 1.22, unit: "kWh", icon: "📈" }
     ];
 
     const grid = document.getElementById('resultsGrid');
@@ -105,28 +112,22 @@ function runCalculations() {
             </div>`;
     });
 
-    const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
+    const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergyTotal * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
     const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
 
     document.getElementById('totalBase').innerText = Math.round(cBase).toLocaleString() + " €";
-    document.getElementById('totalTarget').innerText = Math.round(cBase * 0.7).toLocaleString() + " €";
+    document.getElementById('totalTarget').innerText = Math.round(cBase * 0.75).toLocaleString() + " €";
     document.getElementById('totalCurrent').innerText = Math.round(cCurr).toLocaleString() + " €";
 
-    const efficiency = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.3)) * 100));
+    const efficiency = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.25)) * 100));
     if(document.getElementById('efficiencyBar')) {
         document.getElementById('efficiencyBar').style.width = efficiency + "%";
-        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% del objetivo estratégico logrado";
+        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% del objetivo logrado";
     }
 }
 
-function energySavingsValue() {
-    let s = 0;
-    TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id) && p.type === 'energy') s += p.impact; });
-    return s;
-}
-
 // --- GRÁFICA ESTACIONAL MES A MES ---
-function updateChart(energySavings) {
+function updateChart(appliedSaving) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
 
@@ -155,14 +156,14 @@ function updateChart(energySavings) {
                 },
                 {
                     label: 'Standby PCs',
-                    data: monthlyData.map(d => Math.round(d.standby * (1 - energySavings))),
+                    data: monthlyData.map(d => Math.round(d.standby * (1 - (appliedSaving * 0.6)))),
                     borderColor: '#065f46',
                     backgroundColor: 'rgba(6, 95, 70, 0.5)',
                     fill: true, stack: 'combined'
                 },
                 {
                     label: 'Carga Alumnos',
-                    data: monthlyData.map(d => Math.round(d.active * (1 - energySavings))),
+                    data: monthlyData.map(d => Math.round(d.active * (1 - appliedSaving))),
                     borderColor: '#22c55e',
                     backgroundColor: 'rgba(34, 197, 94, 0.4)',
                     fill: true, stack: 'combined'
@@ -188,7 +189,7 @@ function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) :
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
 /**
- * LOGICA ORIGINAL DE IMPRESION (PDF) - MANTENIDA
+ * LOGICA DE IMPRESION (PDF) - MANTENIDA
  */
 window.onbeforeprint = () => {
     if (myChart) {
