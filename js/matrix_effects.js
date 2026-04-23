@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FINAL STABLE PDF VERSION
+ * ITB INFRASTRUCTURE AUDIT - SCRIPT RECUPERADO
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -99,9 +99,9 @@ function updateChart(y1, y2, y3) {
         data: {
             labels: [currentSystemYear + 1, currentSystemYear + 2, currentSystemYear + 3],
             datasets: [{
-                label: 'Projected (kWh)',
+                label: 'Projected Consumption (kWh)',
                 data: [Math.round(y1), Math.round(y2), Math.round(y3)],
-                backgroundColor: isPrinting ? '#22c55e' : 'rgba(34, 197, 94, 0.4)',
+                backgroundColor: 'rgba(34, 197, 94, 0.6)',
                 borderColor: '#22c55e',
                 borderWidth: 2
             }]
@@ -128,15 +128,18 @@ function updateChart(y1, y2, y3) {
     });
 }
 
+function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
+function resetSavings() { activePolicies.clear(); runCalculations(); }
+
+// FUNCIÓN DE EXPORTACIÓN LIMPIA
 function exportPDF() {
-    document.body.classList.add('printing'); // Cambia colores
-    runCalculations(); // Redibuja gráfica en negro
+    document.body.classList.add('printing');
+    runCalculations();
     setTimeout(() => {
         window.print();
         document.body.classList.remove('printing');
-        runCalculations(); // Vuelve a modo web
-    }, 500);
+        runCalculations();
+    }, 300);
 }
 
-function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 window.onload = runCalculations;
