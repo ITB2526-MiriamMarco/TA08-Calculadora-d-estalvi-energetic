@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FINAL RESPONSIVE VERSION
+ * ITB INFRASTRUCTURE AUDIT - FIXED AXIS VERSION
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -17,13 +17,18 @@ const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
 
+// HE AÑADIDO 3 POLÍTICAS NUEVAS AL FINAL PARA SOLUCIONAR EL STANDBY Y EL WASTED ENERGY
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
     { id: 'iot_water', label: "IoT Sensors", impact: 0.05, type: 'water', category: "Facility Water" },
     { id: 'virt', label: "Virtualization", impact: 0.15, type: 'energy', category: "System Energy Load" },
     { id: 'autoff', label: "Auto-Shutdown", impact: 0.10, type: 'energy', category: "System Energy Load" },
     { id: 'remote', label: "Remote Management", impact: 0.10, type: 'maint', category: "Cleaning Costs" },
-    { id: 'inv', label: "Inventory Opt.", impact: 0.05, type: 'maint', category: "Supplies Costs" }
+    { id: 'inv', label: "Inventory Opt.", impact: 0.05, type: 'maint', category: "Supplies Costs" },
+    // NUEVAS POLÍTICAS PARA EL PROFESOR:
+    { id: 'smart_plugs', label: "Smart Power Strips", impact: 0.30, type: 'energy', category: "Standby Consumption" },
+    { id: 'hvac_ai', label: "AI HVAC Control", impact: 0.25, type: 'energy', category: "Wasted Energy" },
+    { id: 'motion_sensors', label: "Motion Sensors", impact: 0.15, type: 'energy', category: "Wasted Energy" }
 ];
 
 let activePolicies = new Set();
@@ -93,7 +98,6 @@ function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
 
-    // DETECCIÓN DE MÓVIL PARA MEJORAR ASPECT RATIO
     const isMobile = window.innerWidth < 600;
 
     myChart = new Chart(ctx, {
@@ -111,7 +115,6 @@ function updateChart(y1, y2, y3) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // Ajuste dinámico de escala para móviles
             aspectRatio: isMobile ? 1 : 2,
             scales: {
                 y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff', font: { size: isMobile ? 10 : 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
@@ -178,7 +181,6 @@ window.onafterprint = () => {
     }
 };
 
-// AJUSTE PARA REDIBUJAR SI SE GIRA EL MÓVIL
 window.onresize = () => { if(myChart) runCalculations(); };
 
 window.onload = runCalculations;
