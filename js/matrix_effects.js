@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - SCRIPT RECUPERADO
+ * ITB INFRASTRUCTURE AUDIT - FIXED AXIS VERSION
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -33,6 +33,8 @@ function runCalculations() {
     const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
     const selectedMode = parseInt(document.getElementById('calcMode').value);
 
+    document.getElementById('currentYearDisplay').innerText = currentSystemYear;
+
     const schoolDays = 175;
     const idleDays = (selectedMode === 365) ? 190 : 0;
 
@@ -52,7 +54,6 @@ function runCalculations() {
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
 
     if (initialMaxEnergy === null) initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
-
     updateChart(y1, y2, y3);
 
     const expM = selectedMode/30;
@@ -86,13 +87,10 @@ function runCalculations() {
     document.getElementById('totalBase').innerText = Math.round(cBase).toLocaleString() + " €";
     document.getElementById('totalTarget').innerText = Math.round(cBase * 0.7).toLocaleString() + " €";
     document.getElementById('totalCurrent').innerText = Math.round(cCurr).toLocaleString() + " €";
-    document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 }
 
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
-    const isPrinting = document.body.classList.contains('printing');
-
     if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'bar',
@@ -101,45 +99,70 @@ function updateChart(y1, y2, y3) {
             datasets: [{
                 label: 'Projected Consumption (kWh)',
                 data: [Math.round(y1), Math.round(y2), Math.round(y3)],
-                backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                backgroundColor: 'rgba(34, 197, 94, 0.4)',
                 borderColor: '#22c55e',
                 borderWidth: 2
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             scales: {
-                y: {
-                    beginAtZero: true,
-                    max: Math.round(initialMaxEnergy),
-                    ticks: { color: isPrinting ? '#000' : '#fff' },
-                    grid: { color: isPrinting ? '#ddd' : 'rgba(255,255,255,0.1)' }
-                },
-                x: {
-                    ticks: { color: isPrinting ? '#000' : '#fff' },
-                    grid: { display: false }
-                }
+                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
-            plugins: {
-                legend: { labels: { color: isPrinting ? '#000' : '#fff' } }
-            }
+            plugins: { legend: { position: 'top', labels: { color: '#fff' } } }
         }
     });
 }
 
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
-function resetSavings() { activePolicies.clear(); runCalculations(); }
+function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// FUNCIÓN DE EXPORTACIÓN LIMPIA
-function exportPDF() {
-    document.body.classList.add('printing');
-    runCalculations();
-    setTimeout(() => {
-        window.print();
-        document.body.classList.remove('printing');
-        runCalculations();
-    }, 300);
-}
+// --- EL FIX CLAVE PARA LOS EJES ---
+window.onbeforeprint = () => {
+    // Forzamos negro para que se vea en el papel blanco
+    myChart.options.scales.x.ticks.color = '#000000';
+    myChart.options.scales.y.ticks.color = '#000000';
+    myChart.options.plugins.legend.labels.color = '#000000';
 
+    // Cambiamos la rejilla a un gris suave para que no sea invisible
+    myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+
+    myChart.options.plugins.legend.position = 'bottom';
+    myChart.options.maintainAspectRatio = true;
+    myChart.options.aspectRatio = 2.8;
+    myChart.update();
+};
+
+window.onafterprint = () => {
+    // Restauramos el modo Matrix (Blanco sobre negro)
+    myChart.options.scales.x.ticks.color = '#ffffff';
+    myChart.options.scales.y.ticks.color = '#ffffff';
+    myChart.options.plugins.legend.labels.color = '#ffffff';
+    myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+
+    myChart.options.plugins.legend.position = 'top';
+    myChart.options.maintainAspectRatio = false;
+    myChart.update();
+};
+// Este bloque solo actúa cuando pulsas imprimir, no toca nada de la web
+window.onbeforeprint = () => {
+    if (myChart) {
+        // Forzamos ejes negros para el papel
+        myChart.options.scales.x.ticks.color = '#000000';
+        myChart.options.scales.y.ticks.color = '#000000';
+        myChart.options.plugins.legend.labels.color = '#000000';
+        myChart.update();
+    }
+};
+
+window.onafterprint = () => {
+    if (myChart) {
+        // Devolvemos los ejes a blanco para el modo Matrix
+        myChart.options.scales.x.ticks.color = '#ffffff';
+        myChart.options.scales.y.ticks.color = '#ffffff';
+        myChart.options.plugins.legend.labels.color = '#ffffff';
+        myChart.update();
+    }
+};
 window.onload = runCalculations;
