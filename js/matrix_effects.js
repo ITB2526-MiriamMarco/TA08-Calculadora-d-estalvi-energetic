@@ -1,5 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - SMART MONTHLY & ENERGY SAVING VERSION
+ * ITB INFRASTRUCTURE AUDIT - FULL REALISM VERSION
+ * Includes: Monthly Analysis, Holidays, Summer Staff, and 24/7 Critical Infra (Nubulet)
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -16,8 +17,8 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
+const CRITICAL_INFRA_WATTAGE = 550; // Consumo fijo 24/7 (Nubulet, Routers, Seguridad)
 
-// POLÍTICAS ACTUALIZADAS (Incluye las nuevas para Standby y Wasted Energy)
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
     { id: 'iot_water', label: "IoT Sensors", impact: 0.05, type: 'water', category: "Facility Water" },
@@ -36,13 +37,12 @@ function runCalculations() {
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
     const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
 
-    // Obtener valor del selector (Días lectivos teóricos)
     let schoolDays = parseInt(document.getElementById('calcMode').value);
     const selectedOptionText = document.getElementById('calcMode').options[document.getElementById('calcMode').selectedIndex].text;
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- LÓGICA DE FESTIVOS POR MES ---
+    // --- 1. LÓGICA DE DÍAS Y FESTIVOS ---
     let holidays = 0;
     if (selectedOptionText.includes("January")) holidays = 1;
     if (selectedOptionText.includes("May")) holidays = 1;
@@ -51,24 +51,40 @@ function runCalculations() {
     if (selectedOptionText.includes("November")) holidays = 1;
     if (selectedOptionText.includes("December")) holidays = 2;
 
-    // Ajustar días lectivos reales restando festivos (si no es el periodo total)
-    if (schoolDays > 0 && schoolDays !== 175 && schoolDays !== 365) {
+    if (schoolDays > 0 && schoolDays < 175) {
         schoolDays = Math.max(0, schoolDays - holidays);
     }
 
-    // Calcular días de inactividad (IDLE)
-    // Si es mes, restamos de 30. Si es año, restamos de 365.
-    const idleDays = (schoolDays === 175 || schoolDays === 365) ? (365 - schoolDays) : (30 - schoolDays);
+    // El total de días del periodo analizado (Mes = 30, Curso = 365)
+    const totalPeriodDays = (schoolDays === 175 || schoolDays === 365) ? 365 : 30;
+    const idleDays = totalPeriodDays - schoolDays;
 
-    // Cálculos Base de Energía
-    const totalStandbyBase = (pcCount * STANDBY_WATTAGE * 24 * (schoolDays + idleDays)) / 1000;
+    // --- 2. LÓGICA DE ENERGÍA (Standby 24/7 vs Activo) ---
+    // Standby de PCs (Ocurre todos los días del mes/año)
+    const totalStandbyBase = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
+
+    // Consumo Crítico Fijo (Nubulet/Servidores/Red) - NUNCA se apaga
+    const infraCriticalFixed = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
+
+    // Energía Activa (Solo días lectivos, 12h de uso diario estimado)
     const activeEnergyBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
-    const baseEnergy = activeEnergyBase + totalStandbyBase;
 
-    // Cálculo Base de Agua
-    const baseWater = (occupancy * INFRA_DATA.water.fixedDailyPerPax * schoolDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
+    const baseEnergy = activeEnergyBase + totalStandbyBase + infraCriticalFixed;
 
-    // Procesar Ahorros de Políticas
+    // --- 3. LÓGICA DE AGUA (Alumnos vs Staff Verano) ---
+    let currentPax = occupancy;
+    if (schoolDays === 0) {
+        // Si no hay clases, usamos ocupación de despachos/mantenimiento
+        currentPax = (selectedOptionText.includes("July")) ? 50 : 10;
+        // En verano, los días de "uso" de agua son los laborales del staff (aprox 22)
+        var waterDays = 22;
+    } else {
+        var waterDays = schoolDays;
+    }
+
+    const baseWater = (currentPax * INFRA_DATA.water.fixedDailyPerPax * waterDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
+
+    // --- 4. PROCESAR AHORROS ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => {
         if (activePolicies.has(p.id)) savings[p.type] += p.impact;
@@ -77,7 +93,7 @@ function runCalculations() {
     const currEnergy = baseEnergy * (1 - savings.energy);
     const currWater = baseWater * (1 - savings.water);
 
-    // Proyección a 3 años (Gráfica)
+    // --- 5. GRÁFICA Y MÉTRICAS ---
     const y1 = currEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
@@ -85,22 +101,19 @@ function runCalculations() {
     if (initialMaxEnergy === null) initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     updateChart(y1, y2, y3);
 
-    // Factor de multiplicación para costes (mes = 1, curso/año = 12)
-    const expM = (schoolDays === 175 || schoolDays === 365) ? 12 : 1;
+    const expM = (schoolDays >= 175) ? 12 : 1;
 
-    // MÉTRICAS PARA LAS TARJETAS
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
         { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍" },
         { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * expM) * 0.7, unit: "€", icon: "🛠️" },
         { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * expM) * 0.7, unit: "€", icon: "📦" },
-        { title: "Standby Consumption", val: totalStandbyBase * (1 - savings.energy), goal: totalStandbyBase * 0.5, unit: "kWh", icon: "🌙" },
+        { title: "Standby Consumption", val: (totalStandbyBase + infraCriticalFixed) * (1 - (savings.energy * 0.8)), goal: totalStandbyBase * 0.5, unit: "kWh", icon: "🌙" },
         { title: "Wasted Energy", val: (baseEnergy * 0.25) * (1 - savings.energy), goal: (baseEnergy * 0.05), unit: "kWh", icon: "⚠️" },
         { title: `${currentSystemYear + 1} Forecast`, val: y1, goal: (baseEnergy * 0.7) * 1.22, unit: "kWh", icon: "📈" }
     ];
 
-    // Renderizar Tarjetas
     const grid = document.getElementById('resultsGrid');
     grid.innerHTML = "";
     metrics.forEach(m => {
@@ -114,7 +127,6 @@ function runCalculations() {
             </div>`;
     });
 
-    // Resumen Financiero Final
     const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergy * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
     const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
 
@@ -122,7 +134,6 @@ function runCalculations() {
     document.getElementById('totalTarget').innerText = Math.round(cBase * 0.7).toLocaleString() + " €";
     document.getElementById('totalCurrent').innerText = Math.round(cCurr).toLocaleString() + " €";
 
-    // Actualizar barra de eficiencia si existe
     const efficiency = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.3)) * 100));
     if(document.getElementById('efficiencyBar')) {
         document.getElementById('efficiencyBar').style.width = efficiency + "%";
@@ -130,7 +141,6 @@ function runCalculations() {
     }
 }
 
-// --- GESTIÓN DE GRÁFICA ---
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
@@ -160,7 +170,6 @@ function updateChart(y1, y2, y3) {
     });
 }
 
-// --- FUNCIONES DE INTERFAZ ---
 function toggleAction(id) {
     activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id);
     runCalculations();
@@ -172,7 +181,6 @@ function resetSavings() {
     runCalculations();
 }
 
-// --- EVENTOS DE IMPRESIÓN ---
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000';
