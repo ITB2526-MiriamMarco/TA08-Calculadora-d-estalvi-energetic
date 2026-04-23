@@ -1,6 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FULL REALISM VERSION
- * Includes: Monthly Analysis, Holidays, Summer Staff, and 24/7 Critical Infra (Nubulet)
+ * ITB INFRASTRUCTURE AUDIT - FINAL PRODUCTION VERSION
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -17,7 +16,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Consumo fijo 24/7 (Nubulet, Routers, Seguridad)
+const CRITICAL_INFRA_WATTAGE = 550; // Nubulet, Routers, Core Red 24/7
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -36,64 +35,49 @@ let activePolicies = new Set();
 function runCalculations() {
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
     const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
-
     let schoolDays = parseInt(document.getElementById('calcMode').value);
-    const selectedOptionText = document.getElementById('calcMode').options[document.getElementById('calcMode').selectedIndex].text;
+    const selectedText = document.getElementById('calcMode').options[document.getElementById('calcMode').selectedIndex].text;
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- 1. LÓGICA DE DÍAS Y FESTIVOS ---
+    // --- 1. LÓGICA DE DÍAS REALES (Festivos y Findes) ---
     let holidays = 0;
-    if (selectedOptionText.includes("January")) holidays = 1;
-    if (selectedOptionText.includes("May")) holidays = 1;
-    if (selectedOptionText.includes("September")) holidays = 1;
-    if (selectedOptionText.includes("October")) holidays = 1;
-    if (selectedOptionText.includes("November")) holidays = 1;
-    if (selectedOptionText.includes("December")) holidays = 2;
+    if (selectedText.includes("January")) holidays = 1;
+    if (selectedText.includes("May")) holidays = 1;
+    if (selectedText.includes("September")) holidays = 1;
+    if (selectedText.includes("October")) holidays = 1;
+    if (selectedText.includes("November")) holidays = 1;
+    if (selectedText.includes("December")) holidays = 2;
 
-    if (schoolDays > 0 && schoolDays < 175) {
-        schoolDays = Math.max(0, schoolDays - holidays);
-    }
+    if (schoolDays > 0 && schoolDays < 175) schoolDays = Math.max(0, schoolDays - holidays);
 
-    // El total de días del periodo analizado (Mes = 30, Curso = 365)
-    const totalPeriodDays = (schoolDays === 175 || schoolDays === 365) ? 365 : 30;
+    const totalPeriodDays = (schoolDays >= 175) ? 365 : 30;
     const idleDays = totalPeriodDays - schoolDays;
 
-    // --- 2. LÓGICA DE ENERGÍA (Standby 24/7 vs Activo) ---
-    // Standby de PCs (Ocurre todos los días del mes/año)
-    const totalStandbyBase = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
+    // --- 2. ENERGÍA (Nubulet 24/7 + PCs) ---
+    const standbyBase = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
+    const infraFixed = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
+    const activeBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
+    const baseEnergy = activeBase + standbyBase + infraFixed;
 
-    // Consumo Crítico Fijo (Nubulet/Servidores/Red) - NUNCA se apaga
-    const infraCriticalFixed = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
-
-    // Energía Activa (Solo días lectivos, 12h de uso diario estimado)
-    const activeEnergyBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
-
-    const baseEnergy = activeEnergyBase + totalStandbyBase + infraCriticalFixed;
-
-    // --- 3. LÓGICA DE AGUA (Alumnos vs Staff Verano) ---
+    // --- 3. AGUA (Staff Verano) ---
     let currentPax = occupancy;
+    let waterDays = schoolDays;
     if (schoolDays === 0) {
-        // Si no hay clases, usamos ocupación de despachos/mantenimiento
-        currentPax = (selectedOptionText.includes("July")) ? 50 : 10;
-        // En verano, los días de "uso" de agua son los laborales del staff (aprox 22)
-        var waterDays = 22;
-    } else {
-        var waterDays = schoolDays;
+        currentPax = (selectedText.includes("July")) ? 50 : 10;
+        waterDays = 22; // Días laborales de administración
     }
-
     const baseWater = (currentPax * INFRA_DATA.water.fixedDailyPerPax * waterDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
 
-    // --- 4. PROCESAR AHORROS ---
+    // --- 4. AHORROS ---
     let savings = { water: 0, energy: 0, maint: 0 };
-    TECH_POLICIES.forEach(p => {
-        if (activePolicies.has(p.id)) savings[p.type] += p.impact;
-    });
+    TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
     const currEnergy = baseEnergy * (1 - savings.energy);
     const currWater = baseWater * (1 - savings.water);
 
-    // --- 5. GRÁFICA Y MÉTRICAS ---
+    // --- 5. MÉTRICAS ---
+    const expM = (schoolDays >= 175) ? 12 : 1;
     const y1 = currEnergy * (1 + INFRA_DATA.electricity.variationRate);
     const y2 = y1 * (1 + INFRA_DATA.electricity.variationRate);
     const y3 = y2 * (1 + INFRA_DATA.electricity.variationRate);
@@ -101,15 +85,13 @@ function runCalculations() {
     if (initialMaxEnergy === null) initialMaxEnergy = (baseEnergy * Math.pow(1.2281, 3)) * 1.1;
     updateChart(y1, y2, y3);
 
-    const expM = (schoolDays >= 175) ? 12 : 1;
-
     const metrics = [
         { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergy * 0.70, unit: "kWh", icon: "🖥️" },
         { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergy * 0.70) * CO2_FACTOR, unit: "kg", icon: "🌍" },
         { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * expM) * 0.7, unit: "€", icon: "🛠️" },
         { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * expM) * 0.7, unit: "€", icon: "📦" },
-        { title: "Standby Consumption", val: (totalStandbyBase + infraCriticalFixed) * (1 - (savings.energy * 0.8)), goal: totalStandbyBase * 0.5, unit: "kWh", icon: "🌙" },
+        { title: "Standby Consumption", val: (standbyBase + infraFixed) * (1 - (savings.energy * 0.8)), goal: standbyBase * 0.5, unit: "kWh", icon: "🌙" },
         { title: "Wasted Energy", val: (baseEnergy * 0.25) * (1 - savings.energy), goal: (baseEnergy * 0.05), unit: "kWh", icon: "⚠️" },
         { title: `${currentSystemYear + 1} Forecast`, val: y1, goal: (baseEnergy * 0.7) * 1.22, unit: "kWh", icon: "📈" }
     ];
@@ -137,59 +119,60 @@ function runCalculations() {
     const efficiency = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.3)) * 100));
     if(document.getElementById('efficiencyBar')) {
         document.getElementById('efficiencyBar').style.width = efficiency + "%";
-        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% del objetivo estratégico logrado";
+        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% del objetivo logrado";
     }
 }
 
+// --- GRÁFICA DE ÁREAS APILADAS ---
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
-    const isMobile = window.innerWidth < 600;
+
+    const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
+    const fixedBaseAnual = ( (CRITICAL_INFRA_WATTAGE + (pcCount * STANDBY_WATTAGE)) * 24 * 365 ) / 1000;
+
+    const activeY1 = Math.max(0, y1 - fixedBaseAnual);
+    const activeY2 = Math.max(0, y2 - fixedBaseAnual);
+    const activeY3 = Math.max(0, y3 - fixedBaseAnual);
 
     myChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: [currentSystemYear + 1, currentSystemYear + 2, currentSystemYear + 3],
-            datasets: [{
-                label: 'Projected Consumption (kWh)',
-                data: [Math.round(y1), Math.round(y2), Math.round(y3)],
-                backgroundColor: 'rgba(34, 197, 94, 0.4)',
-                borderColor: '#22c55e',
-                borderWidth: 2
-            }]
+            datasets: [
+                {
+                    label: 'Infra Crítica (Nubulet 24/7)',
+                    data: [fixedBaseAnual, fixedBaseAnual, fixedBaseAnual],
+                    borderColor: '#1e3a8a',
+                    backgroundColor: 'rgba(30, 58, 138, 0.6)',
+                    fill: true,
+                    tension: 0.1,
+                    stack: 'combined'
+                },
+                {
+                    label: 'Carga Sistemas Activos',
+                    data: [activeY1, activeY2, activeY3],
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.4)',
+                    fill: true,
+                    tension: 0.3,
+                    stack: 'combined'
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: { stacked: true, beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
                 x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
-            plugins: { legend: { position: isMobile ? 'bottom' : 'top', labels: { color: '#fff' } } }
+            plugins: { legend: { labels: { color: '#fff' } } }
         }
     });
 }
 
-function toggleAction(id) {
-    activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id);
-    runCalculations();
-}
-
-function resetSavings() {
-    activePolicies.clear();
-    initialMaxEnergy = null;
-    runCalculations();
-}
-
-window.onbeforeprint = () => {
-    if (myChart) {
-        myChart.options.scales.x.ticks.color = '#000';
-        myChart.options.scales.y.ticks.color = '#000';
-        myChart.options.plugins.legend.labels.color = '#000';
-        myChart.update();
-    }
-};
-
-window.onafterprint = () => { if (myChart) runCalculations(); };
+function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
+function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 window.onresize = () => { if(myChart) runCalculations(); };
 window.onload = runCalculations;

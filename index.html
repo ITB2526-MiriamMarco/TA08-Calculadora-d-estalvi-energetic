@@ -26,33 +26,31 @@
                 <input type="number" id="pcCount" value="627" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
-                <label for="studentCount">Ocupación Diaria (Personas)</label>
+                <label for="studentCount">Ocupación Diaria (Alumnos)</label>
                 <input type="number" id="studentCount" value="1600" min="0" onchange="runCalculations()">
             </div>
             <div class="input-field">
                 <label for="calcMode">Periodo de Análisis / Mes</label>
                 <select id="calcMode" onchange="runCalculations()">
-                    <option value="175">Curso Completo (175 días lectivos)</option>
+                    <option value="175">Curso Completo (175 días)</option>
                     <option value="365">Año Fiscal (365 días)</option>
-
                     <option value="20">Enero (20 días)</option>
                     <option value="18">Febrero (18 días)</option>
-                    <option value="15">Marzo (Semana Santa - 15 días)</option>
+                    <option value="15">Marzo (15 días)</option>
                     <option value="21">Abril (21 días)</option>
                     <option value="20">Mayo (20 días)</option>
                     <option value="15">Junio (15 días)</option>
-                    <option value="0">Julio (Cerrado - 0 días)</option>
-                    <option value="0">Agosto (Cerrado - 0 días)</option>
+                    <option value="0">Julio (Vacaciones - 0 días)</option>
+                    <option value="0">Agosto (Vacaciones - 0 días)</option>
                     <option value="20">Septiembre (20 días)</option>
                     <option value="21">Octubre (21 días)</option>
                     <option value="19">Noviembre (19 días)</option>
-                    <option value="12">Diciembre (Navidad - 12 días)</option>
+                    <option value="12">Diciembre (12 días)</option>
                 </select>
             </div>
         </section>
 
-        <main class="dashboard-grid" id="resultsGrid">
-        </main>
+        <main class="dashboard-grid" id="resultsGrid"></main>
 
         <section class="chart-container-wrapper">
             <h2>Proyección de Tendencia Energética (Próximos 3 Años)</h2>
@@ -79,21 +77,21 @@
             </div>
             <div class="efficiency-wrapper" style="margin-top: 20px;">
                 <div class="efficiency-bar-container" style="background: #333; height: 10px; border-radius: 5px; overflow: hidden;">
-                    <div id="efficiencyBar" class="efficiency-bar" style="background: var(--primary-green); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                    <div id="efficiencyBar" class="efficiency-bar" style="background: #22c55e; height: 100%; width: 0%; transition: width 0.5s;"></div>
                 </div>
-                <p id="efficiencyText" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; text-align: right;">0% del objetivo logrado</p>
+                <p id="efficiencyText" style="font-size: 0.8rem; color: #888; margin-top: 5px; text-align: right;">0% logrado</p>
             </div>
         </section>
 
         <section class="strategy-panel">
             <div class="strategy-buttons">
                 <button class="btn-primary" onclick="resetSavings()">Reiniciar Políticas</button>
-                <button class="btn-outline" onclick="window.print()">Exportar Informe PDF</button>
+                <button class="btn-outline" onclick="window.print()">Exportar PDF</button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; <span id="currentYearDisplay"></span> ITB - Proyecto ASIX | Dashboard de Sostenibilidad Operativa</p>
+            <p>&copy; <span id="currentYearDisplay"></span> ITB - Proyecto ASIX</p>
         </footer>
     </div>
 
