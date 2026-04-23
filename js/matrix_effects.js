@@ -1,5 +1,5 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FIXED AXIS VERSION
+ * ITB INFRASTRUCTURE AUDIT - FINAL RESPONSIVE VERSION
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -92,6 +92,10 @@ function runCalculations() {
 function updateChart(y1, y2, y3) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
+
+    // DETECCIÓN DE MÓVIL PARA MEJORAR ASPECT RATIO
+    const isMobile = window.innerWidth < 600;
+
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -105,12 +109,20 @@ function updateChart(y1, y2, y3) {
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            // Ajuste dinámico de escala para móviles
+            aspectRatio: isMobile ? 1 : 2,
             scales: {
-                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                x: { ticks: { color: '#fff' }, grid: { display: false } }
+                y: { beginAtZero: true, max: Math.round(initialMaxEnergy), ticks: { color: '#fff', font: { size: isMobile ? 10 : 12 } }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                x: { ticks: { color: '#fff', font: { size: isMobile ? 10 : 12 } }, grid: { display: false } }
             },
-            plugins: { legend: { position: 'top', labels: { color: '#fff' } } }
+            plugins: {
+                legend: {
+                    position: isMobile ? 'bottom' : 'top',
+                    labels: { color: '#fff', font: { size: isMobile ? 10 : 12 } }
+                }
+            }
         }
     });
 }
@@ -123,18 +135,14 @@ function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCa
  */
 window.onbeforeprint = () => {
     if (myChart) {
-        // Colores para papel blanco (Negro)
         myChart.options.scales.x.ticks.color = '#000000';
         myChart.options.scales.y.ticks.color = '#000000';
         myChart.options.plugins.legend.labels.color = '#000000';
         myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
-
-        // Ajustes de posicion y layout
         myChart.options.plugins.legend.position = 'bottom';
         myChart.options.maintainAspectRatio = true;
-        myChart.options.aspectRatio = 2.8;
+        myChart.options.aspectRatio = 2.5;
 
-        // Mostrar datos numéricos sobre las barras
         myChart.options.animation = {
             duration: 0,
             onComplete: function() {
@@ -159,19 +167,18 @@ window.onbeforeprint = () => {
 
 window.onafterprint = () => {
     if (myChart) {
-        // Restaurar modo Matrix (Blanco sobre negro)
         myChart.options.scales.x.ticks.color = '#ffffff';
         myChart.options.scales.y.ticks.color = '#ffffff';
         myChart.options.plugins.legend.labels.color = '#ffffff';
         myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
-
-        // Restaurar layout original
         myChart.options.plugins.legend.position = 'top';
         myChart.options.maintainAspectRatio = false;
         myChart.options.animation = { duration: 1000 };
-
         myChart.update();
     }
 };
+
+// AJUSTE PARA REDIBUJAR SI SE GIRA EL MÓVIL
+window.onresize = () => { if(myChart) runCalculations(); };
 
 window.onload = runCalculations;
