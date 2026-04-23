@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - PROFESSIONAL TECH VERSION
- * Features: Seasonal consumption, 24/7 Critical Infra, and Incompressible Floor.
+ * ITB INFRASTRUCTURE AUDIT - FINAL CALENDAR VERSION
+ * Features: Correct Summer Valley (Aug-Sept), Incompressible Floor, 24/7 Infra.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -17,7 +17,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Nubulet y Core Red (Inmune a políticas)
+const CRITICAL_INFRA_WATTAGE = 550; // Nubulet y Core Red (Consumo fijo)
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -41,11 +41,11 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- 1. LÓGICA DE DÍAS Y ESTACIONALIDAD ---
+    // --- 1. LÓGICA DE DÍAS Y CALENDARIO ---
     let holidays = 0;
     if (selectedText.includes("January")) holidays = 1;
     if (selectedText.includes("May")) holidays = 1;
-    if (selectedText.includes("September")) holidays = 1;
+    if (selectedText.includes("September")) holidays = 15; // Refleja que media quincena no hay actividad
     if (selectedText.includes("October")) holidays = 1;
     if (selectedText.includes("November")) holidays = 1;
     if (selectedText.includes("December")) holidays = 2;
@@ -55,7 +55,7 @@ function runCalculations() {
     const totalPeriodDays = (schoolDays >= 175) ? 365 : 30;
     const idleDays = totalPeriodDays - schoolDays;
 
-    // --- 2. ENERGÍA BASE (Cálculo sin ahorros) ---
+    // --- 2. ENERGÍA BASE ---
     const standbyBase = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
     const infraFixed = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
     const activeBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
@@ -64,23 +64,24 @@ function runCalculations() {
     // --- 3. AGUA ---
     let currentPax = occupancy;
     let waterDays = schoolDays;
-    if (schoolDays === 0) {
-        currentPax = (selectedText.includes("July")) ? 50 : 10;
+    if (schoolDays === 0) { // Caso Agosto
+        currentPax = 10; // Solo mantenimiento
+        waterDays = 5;
+    } else if (selectedText.includes("July")) {
+        currentPax = Math.round(occupancy * 0.4); // Menos gente pero hay actividad
         waterDays = 22;
     }
     const baseWater = (currentPax * INFRA_DATA.water.fixedDailyPerPax * waterDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
 
-    // --- 4. AHORROS PROTEGIDOS (SUELO TECNOLÓGICO) ---
+    // --- 4. AHORROS CON SUELO TECNOLÓGICO (Mínimo 30% siempre activo) ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
-    // Aplicamos un límite: no se puede ahorrar más del 70% del consumo variable
-    // El infraFixed (Nubulet) es intocable (0% ahorro)
-    const energySavingFactor = Math.min(savings.energy, 0.70);
+    const energySavingFactor = Math.min(savings.energy, 0.70); // Máximo 70% ahorro en variable
 
     const currEnergy = (activeBase * (1 - energySavingFactor)) +
                        (standbyBase * (1 - (energySavingFactor * 0.6))) +
-                       infraFixed; // Base fija siempre se suma
+                       infraFixed;
 
     const currWater = Math.max(baseWater * 0.30, baseWater * (1 - savings.water));
 
@@ -126,13 +127,15 @@ function runCalculations() {
     }
 }
 
-// --- GRÁFICA ESTACIONAL MES A MES ---
+// --- GRÁFICA ESTACIONAL (VALLE AGOSTO-SEPT) ---
 function updateChart(appliedSaving) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
 
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
-    const monthlySchoolDays = [20, 18, 15, 21, 20, 15, 0, 0, 20, 21, 19, 12];
+
+    // Julio tiene gente, Agosto es 0, Septiembre empieza a mitad (10 días)
+    const monthlySchoolDays = [20, 18, 15, 21, 20, 15, 15, 0, 10, 21, 19, 12];
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
     const monthlyData = monthlySchoolDays.map(sDays => {
@@ -150,37 +153,27 @@ function updateChart(appliedSaving) {
                 {
                     label: 'Infra Crítica (Nubulet)',
                     data: monthlyData.map(d => Math.round(d.infra)),
-                    borderColor: '#1e3a8a',
-                    backgroundColor: 'rgba(30, 58, 138, 0.6)',
-                    fill: true, stack: 'combined'
+                    borderColor: '#1e3a8a', backgroundColor: 'rgba(30, 58, 138, 0.6)', fill: true, stack: 'combined'
                 },
                 {
                     label: 'Standby PCs',
                     data: monthlyData.map(d => Math.round(d.standby * (1 - (appliedSaving * 0.6)))),
-                    borderColor: '#065f46',
-                    backgroundColor: 'rgba(6, 95, 70, 0.5)',
-                    fill: true, stack: 'combined'
+                    borderColor: '#065f46', backgroundColor: 'rgba(6, 95, 70, 0.5)', fill: true, stack: 'combined'
                 },
                 {
                     label: 'Carga Alumnos',
                     data: monthlyData.map(d => Math.round(d.active * (1 - appliedSaving))),
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34, 197, 94, 0.4)',
-                    fill: true, stack: 'combined'
+                    borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.4)', fill: true, stack: 'combined'
                 }
             ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             scales: {
                 y: { stacked: true, beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
                 x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
-            plugins: {
-                legend: { labels: { color: '#fff', usePointStyle: true } },
-                tooltip: { mode: 'index', intersect: false }
-            }
+            plugins: { legend: { labels: { color: '#fff' } }, tooltip: { mode: 'index', intersect: false } }
         }
     });
 }
@@ -188,9 +181,7 @@ function updateChart(appliedSaving) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-/**
- * LOGICA DE IMPRESION (PDF) - MANTENIDA
- */
+// --- LÓGICA DE IMPRESIÓN PDF (SIN CAMBIOS) ---
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000000';
@@ -199,7 +190,6 @@ window.onbeforeprint = () => {
         myChart.update();
     }
 };
-
 window.onafterprint = () => { if (myChart) runCalculations(); };
 window.onresize = () => { if(myChart) runCalculations(); };
 window.onload = runCalculations;
