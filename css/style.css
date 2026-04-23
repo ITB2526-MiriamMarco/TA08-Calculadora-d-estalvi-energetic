@@ -93,3 +93,25 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         page-break-inside: avoid !important;
     }
 }
+@media print {
+    /* Asegura que el contenedor del gráfico sea lo suficientemente alto para los datos superiores */
+    .chart-container-wrapper {
+        height: 450px !important;
+        margin: 30px auto !important;
+        padding-top: 20px !important; /* Espacio para que el número de la barra más alta no se corte */
+        page-break-inside: avoid;
+        display: block !important;
+    }
+
+    /* Centra el impacto financiero debajo del gráfico */
+    .financial-summary {
+        margin-top: 20px !important;
+        border: 2px solid #000 !important;
+        page-break-inside: avoid;
+    }
+}
+@media print {
+    .chart-box {
+        padding-top: 25px !important; /* Da espacio para que quepa el número de la barra más alta */
+    }
+}

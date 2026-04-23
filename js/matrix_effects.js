@@ -165,4 +165,57 @@ window.onafterprint = () => {
         myChart.update();
     }
 };
+// Añade esto al final de tu script actual
+window.onbeforeprint = () => {
+    if (myChart) {
+        // 1. Colores de texto para el PDF (Negro)
+        myChart.options.scales.x.ticks.color = '#000000';
+        myChart.options.scales.y.ticks.color = '#000000';
+        myChart.options.plugins.legend.labels.color = '#000000';
+
+        // 2. Rejilla suave (lo que pediste)
+        myChart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+        myChart.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
+
+        // 3. Forzar que se vean los valores sobre las barras en el PDF
+        myChart.options.animation = {
+            duration: 0,
+            onComplete: function() {
+                const ctx = this.ctx;
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillStyle = '#000'; // Color de los números en el PDF
+
+                this.data.datasets.forEach(function(dataset, i) {
+                    const meta = myChart.getDatasetMeta(i);
+                    meta.data.forEach(function(bar, index) {
+                        const data = dataset.data[index];
+                        ctx.fillText(Math.round(data).toLocaleString() + " kWh", bar.x, bar.y - 5);
+                    });
+                });
+            }
+        };
+
+        myChart.update();
+    }
+};
+
+window.onafterprint = () => {
+    if (myChart) {
+        // Restaurar modo Matrix (Blanco)
+        myChart.options.scales.x.ticks.color = '#ffffff';
+        myChart.options.scales.y.ticks.color = '#ffffff';
+        myChart.options.plugins.legend.labels.color = '#ffffff';
+
+        // Restaurar rejilla Matrix
+        myChart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)';
+        myChart.options.scales.x.grid.color = 'transparent';
+
+        // Quitar los números fijos para que la web siga limpia
+        myChart.options.animation = { duration: 1000 };
+
+        myChart.update();
+    }
+};
 window.onload = runCalculations;
