@@ -1,6 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FINAL CALENDAR VERSION
- * Features: Correct Summer Valley (Aug-Sept), Incompressible Floor, 24/7 Infra.
+ * ITB INFRASTRUCTURE AUDIT - FINAL PRODUCTION VERSION
+ * Features: Correct Summer Valley (Aug-Sept), Tech Floor (30%), 24/7 Nubulet.
  */
 
 const currentSystemYear = new Date().getFullYear();
@@ -17,7 +17,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Nubulet y Core Red (Consumo fijo)
+const CRITICAL_INFRA_WATTAGE = 550; // Consumo incompresible (Nubulet 24/7)
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -41,11 +41,11 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- 1. LÓGICA DE DÍAS Y CALENDARIO ---
+    // --- 1. LÓGICA DE DÍAS Y CALENDARIO REAL ---
     let holidays = 0;
     if (selectedText.includes("January")) holidays = 1;
     if (selectedText.includes("May")) holidays = 1;
-    if (selectedText.includes("September")) holidays = 15; // Refleja que media quincena no hay actividad
+    if (selectedText.includes("September")) holidays = 15; // Refleja media quincena de parón
     if (selectedText.includes("October")) holidays = 1;
     if (selectedText.includes("November")) holidays = 1;
     if (selectedText.includes("December")) holidays = 2;
@@ -64,20 +64,20 @@ function runCalculations() {
     // --- 3. AGUA ---
     let currentPax = occupancy;
     let waterDays = schoolDays;
-    if (schoolDays === 0) { // Caso Agosto
-        currentPax = 10; // Solo mantenimiento
+    if (schoolDays === 0) { // Agosto
+        currentPax = 10;
         waterDays = 5;
     } else if (selectedText.includes("July")) {
-        currentPax = Math.round(occupancy * 0.4); // Menos gente pero hay actividad
+        currentPax = Math.round(occupancy * 0.4);
         waterDays = 22;
     }
     const baseWater = (currentPax * INFRA_DATA.water.fixedDailyPerPax * waterDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
 
-    // --- 4. AHORROS CON SUELO TECNOLÓGICO (Mínimo 30% siempre activo) ---
+    // --- 4. AHORROS PROTEGIDOS (TECHO DEL 70% EN VARIABLE) ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
-    const energySavingFactor = Math.min(savings.energy, 0.70); // Máximo 70% ahorro en variable
+    const energySavingFactor = Math.min(savings.energy, 0.70);
 
     const currEnergy = (activeBase * (1 - energySavingFactor)) +
                        (standbyBase * (1 - (energySavingFactor * 0.6))) +
@@ -123,20 +123,20 @@ function runCalculations() {
     const efficiency = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.25)) * 100));
     if(document.getElementById('efficiencyBar')) {
         document.getElementById('efficiencyBar').style.width = efficiency + "%";
-        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% del objetivo logrado";
+        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% del objetivo estratégico logrado";
     }
 }
 
-// --- GRÁFICA ESTACIONAL (VALLE AGOSTO-SEPT) ---
+// --- GRÁFICA ESTACIONAL CON VALLE REAL ---
 function updateChart(appliedSaving) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
 
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
 
-    // Julio tiene gente, Agosto es 0, Septiembre empieza a mitad (10 días)
-    const monthlySchoolDays = [20, 18, 15, 21, 20, 15, 15, 0, 10, 21, 19, 12];
-    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    // Julio (15 días lectivos), Agosto (0 días), Septiembre (5 días - inicio curso)
+    const monthlySchoolDays = [20, 18, 15, 21, 20, 15, 15, 0, 5, 21, 19, 12];
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Agosto", "Sept", "Oct", "Nov", "Dic"];
 
     const monthlyData = monthlySchoolDays.map(sDays => {
         const infra = (CRITICAL_INFRA_WATTAGE * 24 * 30) / 1000;
@@ -153,27 +153,37 @@ function updateChart(appliedSaving) {
                 {
                     label: 'Infra Crítica (Nubulet)',
                     data: monthlyData.map(d => Math.round(d.infra)),
-                    borderColor: '#1e3a8a', backgroundColor: 'rgba(30, 58, 138, 0.6)', fill: true, stack: 'combined'
+                    borderColor: '#1e3a8a',
+                    backgroundColor: 'rgba(30, 58, 138, 0.7)',
+                    fill: true, stack: 'combined'
                 },
                 {
                     label: 'Standby PCs',
                     data: monthlyData.map(d => Math.round(d.standby * (1 - (appliedSaving * 0.6)))),
-                    borderColor: '#065f46', backgroundColor: 'rgba(6, 95, 70, 0.5)', fill: true, stack: 'combined'
+                    borderColor: '#065f46',
+                    backgroundColor: 'rgba(6, 95, 70, 0.6)',
+                    fill: true, stack: 'combined'
                 },
                 {
-                    label: 'Carga Alumnos',
+                    label: 'Carga Alumnos (Uso Activo)',
                     data: monthlyData.map(d => Math.round(d.active * (1 - appliedSaving))),
-                    borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.4)', fill: true, stack: 'combined'
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.4)',
+                    fill: true, stack: 'combined'
                 }
             ]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: { stacked: true, beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
                 x: { ticks: { color: '#fff' }, grid: { display: false } }
             },
-            plugins: { legend: { labels: { color: '#fff' } }, tooltip: { mode: 'index', intersect: false } }
+            plugins: {
+                legend: { labels: { color: '#fff', usePointStyle: true } },
+                tooltip: { mode: 'index', intersect: false }
+            }
         }
     });
 }
@@ -181,7 +191,9 @@ function updateChart(appliedSaving) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); initialMaxEnergy = null; runCalculations(); }
 
-// --- LÓGICA DE IMPRESIÓN PDF (SIN CAMBIOS) ---
+/**
+ * LÓGICA DE IMPRESIÓN (MANTENIDA)
+ */
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000000';
@@ -190,6 +202,7 @@ window.onbeforeprint = () => {
         myChart.update();
     }
 };
+
 window.onafterprint = () => { if (myChart) runCalculations(); };
 window.onresize = () => { if(myChart) runCalculations(); };
 window.onload = runCalculations;
