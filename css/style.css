@@ -1,4 +1,4 @@
-/* --- VARIABLES Y BASES (Tus originales) --- */
+/* --- VARIABLES Y BASES --- */
 :root {
     --primary-green: #22c55e;
     --dark-bg: #0a0a0a;
@@ -12,14 +12,14 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 body {
     background-color: var(--dark-bg);
     color: var(--text-main);
     padding: 20px;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .wrapper {
@@ -41,13 +41,12 @@ header {
     color: var(--primary-green);
     text-transform: uppercase;
     font-weight: bold;
-    letter-spacing: 1px;
 }
 
-/* Barra de configuración adaptativa */
+/* Configuración adaptable */
 .config-bar {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
     background: var(--card-bg);
     padding: 20px;
@@ -64,24 +63,24 @@ header {
 
 .input-field label {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .input-field input, .input-field select {
     background: #000;
     border: 1px solid var(--border-color);
     color: var(--primary-green);
-    padding: 12px;
+    padding: 10px;
     border-radius: 4px;
     outline: none;
-    font-size: 1rem; /* Evita zoom automático en iOS */
+    font-size: 1rem; /* Evita zoom molesto en móviles */
 }
 
-/* Grid de tarjetas: Auto-ajustable según ancho de pantalla */
+/* Grid de métricas adaptable */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
     margin-bottom: 30px;
     width: 100%;
 }
@@ -90,58 +89,48 @@ header {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    padding: 15px;
 }
 
 .data {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: bold;
     color: #fff;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: monospace;
 }
 
 .unit {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
     margin-left: 5px;
-}
-
-.target-row {
-    font-size: 0.85rem;
-    margin: 8px 0;
 }
 
 .btn-action {
     background: transparent;
     border: 1px solid var(--border-color);
-    color: var(--text-muted);
-    padding: 8px 12px;
+    color: #a3a3a3;
+    padding: 8px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     cursor: pointer;
-    margin-top: 8px;
-    transition: all 0.2s ease;
-    width: 100%; /* Mejor para pulgares en móvil */
+    margin-top: 10px;
+    width: 100%; /* Mejor para uso táctil */
 }
 
 .btn-action.active-btn {
     background: var(--primary-green) !important;
     color: #000 !important;
     font-weight: bold;
-    border-color: var(--primary-green);
 }
 
-/* Contenedor de gráfica: Altura flexible */
+/* Gráfica */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 30px;
-    height: 450px;
+    height: 500px;
     position: relative;
 }
 
@@ -150,35 +139,34 @@ header {
     width: 100%;
 }
 
-/* Resumen financiero adaptativo */
+/* Resumen financiero y barra */
 .financial-summary {
     background: #000;
     border: 2px solid var(--primary-green);
     border-radius: 12px;
-    padding: 25px;
+    padding: 30px;
     margin-bottom: 30px;
 }
 
 .summary-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
     text-align: center;
 }
 
 .value {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: bold;
     color: #fff;
 }
 
-/* Barra de progreso de eficiencia */
 .efficiency-container {
     width: 100%;
     background: #262626;
     height: 12px;
     border-radius: 6px;
-    margin-top: 15px;
+    margin-top: 20px;
     overflow: hidden;
 }
 
@@ -189,12 +177,11 @@ header {
     transition: width 0.5s ease;
 }
 
-/* Panel de botones de estrategia */
+/* Estrategia */
 .strategy-panel {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 15px;
+    gap: 20px;
     margin: 40px 0;
 }
 
@@ -202,101 +189,96 @@ header {
     background: var(--primary-green);
     color: #000;
     border: none;
-    padding: 14px 30px;
+    padding: 12px 30px;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    min-width: 200px;
 }
 
 .btn-outline {
     background: transparent;
     border: 2px solid var(--text-muted);
     color: var(--text-muted);
-    padding: 14px 30px;
+    padding: 12px 30px;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    min-width: 200px;
 }
 
 footer {
     text-align: center;
-    padding: 30px;
+    padding: 20px;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
-/* --- IMPLEMENTACIÓN RESPONSIVE (Móviles y Tablets) --- */
+/* --- RESPONSIVE (MÓVIL) --- */
 @media (max-width: 768px) {
-    body { padding: 15px; }
-
-    header {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-    }
-
-    .config-bar {
-        grid-template-columns: 1fr; /* Una sola columna en móvil */
-    }
-
-    .chart-container-wrapper {
-        height: 300px; /* Reducimos altura para que no ocupe toda la pantalla */
-        padding: 10px;
-    }
-
-    .value {
-        font-size: 1.5rem;
-    }
-
-    .strategy-panel {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn-primary, .btn-outline {
-        width: 100%;
-    }
+    body { padding: 10px; }
+    header { flex-direction: column; text-align: center; gap: 15px; }
+    .config-bar { grid-template-columns: 1fr; }
+    .chart-container-wrapper { height: 350px; padding: 15px; }
+    .value { font-size: 1.5rem; }
+    .strategy-panel { flex-direction: column; gap: 10px; }
+    .btn-primary, .btn-outline { width: 100%; }
 }
 
-/* --- PDF PRINT OVERWRITE (Optimizado para papel A4) --- */
+/* --- PDF PRINT OVERWRITE (SIN COLISIONES) --- */
 @media print {
     body { background: white !important; color: black !important; padding: 0; }
-    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container { display: none !important; }
-    header { border-bottom: 2px solid black; margin-bottom: 20px; }
+
+    /* Ocultar elementos de interfaz */
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container {
+        display: none !important;
+    }
+
+    header { border-bottom: 2px solid black; margin-bottom: 30px; }
     .green-tech { color: black !important; }
 
+    /* Forzar rejilla de 2 columnas para que no se amontone */
     .dashboard-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important; /* 2 tarjetas por fila en papel */
+        grid-template-columns: repeat(2, 1fr) !important;
         gap: 10px !important;
+        margin-bottom: 40px !important;
     }
 
     .card {
         background: white !important;
-        border: 1px solid #ddd !important;
+        border: 1px solid #eee !important;
         padding: 10px !important;
         page-break-inside: avoid;
     }
 
     .data { color: black !important; font-size: 1.2rem !important; }
 
+    /* Gráfica: Espacio de seguridad para evitar colisiones */
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
         border: 1px solid #ccc !important;
-        margin: 20px 0 !important;
+        margin: 50px 0 !important; /* Margen superior e inferior amplio */
         height: 400px !important;
+        padding: 20px !important;
         page-break-inside: avoid !important;
     }
 
+    /* Resumen Financiero: Separación forzada */
     .financial-summary {
         display: block !important;
         border: 2px solid black !important;
-        background: #f0f0f0 !important;
-        padding: 15px !important;
+        background: #f9f9f9 !important;
+        margin-top: 60px !important; /* Espacio extra para que no choque con la gráfica */
+        padding: 25px !important;
         page-break-inside: avoid !important;
+        clear: both;
     }
-    .value { color: black !important; }
+
+    .summary-container {
+        display: flex !important;
+        justify-content: space-around !important;
+    }
+
+    .value { color: black !important; font-size: 1.6rem !important; }
+    .target-row { color: #555 !important; }
 }
