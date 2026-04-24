@@ -1,11 +1,11 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - FINAL DEFINITIVE VERSION
- * - Agosto/Septiembre: 0 carga activa (Solo Nubulet + Standby)
- * - Suelo tecnológico: 30% de consumo incompresible
- * - Gráfica de áreas apiladas estacional
+ * ITB INFRASTRUCTURE AUDIT - 3-YEAR PROJECTION STRATEGY
+ * - Ciclo completo: 2026, 2027, 2028
+ * - Agosto/Septiembre: 0 carga activa (Solo Nubulet + Standby) en cada año
+ * - Crecimiento tecnológico proyectado: +5% anual
  */
 
-const currentSystemYear = new Date().getFullYear();
+const currentSystemYear = 2026;
 let myChart = null;
 
 const INFRA_DATA = {
@@ -18,7 +18,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Infraestructura crítica siempre ON (Nubulet)
+const CRITICAL_INFRA_WATTAGE = 550;
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -42,63 +42,44 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // --- 1. LÓGICA DE CALENDARIO (Agosto y Septiembre = 0 actividad) ---
-    let holidays = 0;
-    if (selectedText.includes("January")) holidays = 1;
-    if (selectedText.includes("May")) holidays = 1;
-    if (selectedText.includes("October")) holidays = 1;
-    if (selectedText.includes("November")) holidays = 1;
-    if (selectedText.includes("December")) holidays = 2;
-
-    // Si se selecciona Agosto o Septiembre, no hay personal/estudiantes
+    // --- 1. LÓGICA DE CALENDARIO (Valle Agosto/Septiembre) ---
     if (selectedText.includes("August") || selectedText.includes("September")) {
         schoolDays = 0;
     }
 
-    if (schoolDays > 0 && schoolDays < 175) schoolDays = Math.max(0, schoolDays - holidays);
-
     const totalPeriodDays = (schoolDays >= 175) ? 365 : 30;
     const idleDays = totalPeriodDays - schoolDays;
 
-    // --- 2. ENERGÍA BASE ---
+    // --- 2. ENERGÍA Y AHORROS ---
     const standbyBase = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
     const infraFixed = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
     const activeBase = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
     const baseEnergyTotal = activeBase + standbyBase + infraFixed;
 
-    // --- 3. AGUA ---
-    let currentPax = occupancy;
-    let waterDays = schoolDays;
-    if (schoolDays === 0) {
-        currentPax = 5; // Mantenimiento mínimo
-        waterDays = 0;
-    }
-    const baseWater = (currentPax * INFRA_DATA.water.fixedDailyPerPax * waterDays) + (INFRA_DATA.water.maintenanceLitersDay * idleDays);
-
-    // --- 4. AHORROS PROTEGIDOS (Suelo del 30%) ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
-    const energySavingFactor = Math.min(savings.energy, 0.70); // Tope de ahorro del 70%
+    const energySavingFactor = Math.min(savings.energy, 0.70);
+
+    // Energía actual para el dashboard (Año en curso)
     const currEnergy = (activeBase * (1 - energySavingFactor)) +
                        (standbyBase * (1 - (energySavingFactor * 0.6))) +
                        infraFixed;
 
-    const currWater = Math.max(baseWater * 0.30, baseWater * (1 - savings.water));
-
-    // --- 5. ACTUALIZACIÓN INTERFAZ ---
+    // --- 3. ACTUALIZACIÓN DE GRÁFICA PROYECTADA ---
     updateChart(energySavingFactor);
 
+    // --- 4. RENDER DE INTERFAZ (Dashboard) ---
     const expM = (schoolDays >= 175) ? 12 : 1;
+    const currWater = Math.max((occupancy * 133 * schoolDays) * 0.3, (occupancy * 133 * schoolDays) * (1 - savings.water));
+
     const metrics = [
-        { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
+        { title: "Facility Water", val: currWater, goal: (occupancy * 133 * schoolDays) * 0.7, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergyTotal * 0.75, unit: "kWh", icon: "🖥️" },
         { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergyTotal * 0.75) * CO2_FACTOR, unit: "kg", icon: "🌍" },
         { title: "Cleaning Costs", val: (INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.cleaning * expM) * 0.7, unit: "€", icon: "🛠️" },
-        { title: "Supplies Costs", val: (INFRA_DATA.costs.supplies * expM) * (1 - savings.maint), goal: (INFRA_DATA.costs.supplies * expM) * 0.7, unit: "€", icon: "📦" },
         { title: "Standby Consumption", val: (standbyBase * (1 - (energySavingFactor * 0.6))) + infraFixed, goal: (standbyBase + infraFixed) * 0.6, unit: "kWh", icon: "🌙" },
-        { title: "Wasted Energy", val: Math.max(baseEnergyTotal * 0.05, (baseEnergyTotal * 0.25) * (1 - energySavingFactor)), goal: (baseEnergyTotal * 0.08), unit: "kWh", icon: "⚠️" },
-        { title: `Next Year Forecast`, val: currEnergy * 1.22, goal: (baseEnergyTotal * 0.75) * 1.22, unit: "kWh", icon: "📈" }
+        { title: `Next Year Forecast`, val: currEnergy * 1.05, goal: currEnergy, unit: "kWh", icon: "📈" }
     ];
 
     const grid = document.getElementById('resultsGrid');
@@ -114,70 +95,87 @@ function runCalculations() {
             </div>`;
     });
 
-    const cBase = (baseWater * INFRA_DATA.water.pricePerL) + (baseEnergyTotal * INFRA_DATA.energyPriceKwh) + (INFRA_DATA.costs.cleaning * expM) + (INFRA_DATA.costs.supplies * expM);
-    const cCurr = (currWater * INFRA_DATA.water.pricePerL) + (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) + ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
-
-    document.getElementById('totalBase').innerText = Math.round(cBase).toLocaleString() + " €";
-    document.getElementById('totalTarget').innerText = Math.round(cBase * 0.75).toLocaleString() + " €";
+    const cCurr = (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint));
     document.getElementById('totalCurrent').innerText = Math.round(cCurr).toLocaleString() + " €";
-
-    const efficiency = Math.min(100, Math.max(0, ((cBase - cCurr) / (cBase * 0.25)) * 100));
-    if(document.getElementById('efficiencyBar')) {
-        document.getElementById('efficiencyBar').style.width = efficiency + "%";
-        document.getElementById('efficiencyText').innerText = Math.round(efficiency) + "% logrado";
-    }
 }
 
-// --- GRÁFICA DE ÁREAS (Valle total en Agosto-Septiembre) ---
+// --- NUEVA GRÁFICA: PROYECCIÓN 3 AÑOS (2026-2027-2028) ---
 function updateChart(appliedSaving) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     if (myChart) myChart.destroy();
 
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
 
-    // Meses con 0 días lectivos en Agosto y Septiembre según tu petición
+    // Definición de meses y días lectivos (Agosto y Septiembre = 0)
     const monthlySchoolDays = [20, 18, 15, 21, 20, 15, 15, 0, 0, 21, 19, 12];
-    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Agosto", "Sept", "Oct", "Nov", "Dic"];
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-    const monthlyData = monthlySchoolDays.map(sDays => {
-        const infra = (CRITICAL_INFRA_WATTAGE * 24 * 30) / 1000; // Constante (Nubulet)
-        const standby = (pcCount * STANDBY_WATTAGE * 24 * 30) / 1000; // Constante (PCs off)
-        const active = (pcCount * PC_WATTAGE * 12 * sDays) / 1000; // 0 en Ago-Sept
-        return { infra, standby, active };
+    let allLabels = [];
+    let combinedData = [];
+
+    const years = [2026, 2027, 2028];
+    const yearlyGrowth = 1.05; // 5% de crecimiento anual en carga base
+
+    years.forEach((year, yIdx) => {
+        const growthMultiplier = Math.pow(yearlyGrowth, yIdx);
+
+        monthlySchoolDays.forEach((sDays, mIdx) => {
+            allLabels.push(`${months[mIdx]} ${year.toString().slice(-2)}`);
+
+            const infra = (CRITICAL_INFRA_WATTAGE * 24 * 30 * growthMultiplier) / 1000;
+            const standby = (pcCount * STANDBY_WATTAGE * 24 * 30 * growthMultiplier) / 1000;
+            const active = (pcCount * PC_WATTAGE * 12 * sDays * growthMultiplier) / 1000;
+
+            // Calculamos el total mensual con ahorros aplicados
+            const totalMonthlyKwh = infra + (standby * (1 - (appliedSaving * 0.6))) + (active * (1 - appliedSaving));
+            combinedData.push(Math.round(totalMonthlyKwh));
+        });
     });
 
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: months,
-            datasets: [
-                {
-                    label: 'Infra Crítica (Nubulet)',
-                    data: monthlyData.map(d => Math.round(d.infra)),
-                    borderColor: '#1e3a8a', backgroundColor: 'rgba(30, 58, 138, 0.7)', fill: true, stack: 'combined'
-                },
-                {
-                    label: 'Standby PCs',
-                    data: monthlyData.map(d => Math.round(d.standby * (1 - (appliedSaving * 0.6)))),
-                    borderColor: '#065f46', backgroundColor: 'rgba(6, 95, 70, 0.6)', fill: true, stack: 'combined'
-                },
-                {
-                    label: 'Carga Lectiva (Personal)',
-                    data: monthlyData.map(d => Math.round(d.active * (1 - appliedSaving))),
-                    borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.4)', fill: true, stack: 'combined'
-                }
-            ]
+            labels: allLabels,
+            datasets: [{
+                label: 'Proyección Energética Trienal (kWh)',
+                data: combinedData,
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 1,
+                borderWidth: 2
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { stacked: true, beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                x: { ticks: { color: '#fff' }, grid: { display: false } }
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#fff' },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                x: {
+                    ticks: {
+                        color: '#fff',
+                        autoSkip: true,
+                        maxTicksLimit: 12 // Muestra suficientes etiquetas para entender el eje
+                    },
+                    grid: { display: false }
+                }
             },
             plugins: {
                 legend: { labels: { color: '#fff' } },
-                tooltip: { mode: 'index', intersect: false }
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `Consumo: ${context.parsed.y} kWh`;
+                        }
+                    }
+                }
             }
         }
     });
@@ -186,7 +184,7 @@ function updateChart(appliedSaving) {
 function toggleAction(id) { activePolicies.has(id) ? activePolicies.delete(id) : activePolicies.add(id); runCalculations(); }
 function resetSavings() { activePolicies.clear(); runCalculations(); }
 
-// --- LÓGICA DE PDF (MANTENIDA) ---
+// --- LÓGICA DE IMPRESIÓN ---
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000000';
@@ -196,5 +194,4 @@ window.onbeforeprint = () => {
     }
 };
 window.onafterprint = () => { if (myChart) runCalculations(); };
-window.onresize = () => { if(myChart) runCalculations(); };
 window.onload = runCalculations;
