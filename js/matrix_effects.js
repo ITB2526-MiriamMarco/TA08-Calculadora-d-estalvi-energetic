@@ -1,10 +1,9 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - TOTAL SYSTEM
- * - Proyección trienal: 2026, 2027, 2028
- * - Agosto/Septiembre: 0 carga activa (Solo Nubulet + Standby)
+ * ITB INFRASTRUCTURE AUDIT - TOTAL SYSTEM (PDF FIXED)
+ * - Proyección trienal: 2026-2028
  * - 8 Paneles de métricas con lógica de ahorro
  * - Barra de eficiencia financiera funcional
- * - Optimización para PDF
+ * - Ajuste de Aspect Ratio para evitar colisiones en impresión
  */
 
 const currentSystemYear = 2026;
@@ -20,7 +19,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Nubulet (Siempre ON)
+const CRITICAL_INFRA_WATTAGE = 550; // Nubulet
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -44,7 +43,6 @@ function runCalculations() {
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
 
-    // Valle total Agosto-Septiembre (Carga personal = 0)
     if (selectedText.includes("August") || selectedText.includes("September")) {
         schoolDays = 0;
     }
@@ -52,7 +50,7 @@ function runCalculations() {
     const totalPeriodDays = (schoolDays >= 175) ? 365 : 30;
     const expM = (schoolDays >= 175) ? 12 : 1;
 
-    // --- 1. CÁLCULOS BASE (SIN POLÍTICAS) ---
+    // --- 1. CÁLCULOS BASE ---
     const baseStandbyKwh = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
     const baseInfraKwh = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
     const baseActiveKwh = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
@@ -64,7 +62,7 @@ function runCalculations() {
                           (INFRA_DATA.costs.cleaning * expM) +
                           (INFRA_DATA.costs.supplies * expM);
 
-    // --- 2. CÁLCULOS ACTUALES (CON POLÍTICAS) ---
+    // --- 2. CÁLCULOS ACTUALES ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
@@ -123,20 +121,17 @@ function renderCards(currEnergy, baseEnergyTotal, energySavingFactor, standbyBas
 
 function updateFinancialImpact(base, current) {
     const target = base * 0.70;
-
     document.getElementById('totalBase').innerText = Math.round(base).toLocaleString() + " €";
     document.getElementById('totalTarget').innerText = Math.round(target).toLocaleString() + " €";
     document.getElementById('totalCurrent').innerText = Math.round(current).toLocaleString() + " €";
 
     const totalSavingNeeded = base - target;
     const currentSavingMade = base - current;
-
     let efficiency = (totalSavingNeeded > 0) ? (currentSavingMade / totalSavingNeeded) * 100 : 0;
     efficiency = Math.max(0, Math.min(100, efficiency));
 
     const bar = document.getElementById('efficiencyBar');
     const text = document.getElementById('efficiencyText');
-
     if (bar) bar.style.width = efficiency + "%";
     if (text) text.innerText = Math.round(efficiency) + "% logrado";
 }
@@ -177,7 +172,7 @@ function updateChart(appliedSaving) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // CAMBIO CRÍTICO PARA EL PDF
             scales: {
                 y: { stacked: true, beginAtZero: true, ticks: { color: '#fff' } },
                 x: { ticks: { color: '#fff', autoSkip: true, maxTicksLimit: 12 } }
@@ -195,6 +190,7 @@ function toggleAction(id) {
     runCalculations();
 }
 
+// --- OPTIMIZACIÓN PDF ---
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000000';
