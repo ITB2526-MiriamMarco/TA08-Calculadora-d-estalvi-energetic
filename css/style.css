@@ -44,11 +44,6 @@ header {
     font-weight: bold;
 }
 
-.status-badge {
-    font-size: 0.8rem;
-    color: var(--primary-green);
-}
-
 /* --- CONFIGURATION BAR --- */
 .config-bar {
     display: grid;
@@ -85,12 +80,13 @@ header {
 /* --- METRICS GRID --- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 15px;
     margin-bottom: 30px;
     width: 100%;
 }
 
+/* Estilos de las tarjetas que genera el JS */
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -107,10 +103,9 @@ header {
     font-family: monospace;
 }
 
-.unit {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-left: 5px;
+.target-row {
+    font-size: 0.85rem;
+    margin: 5px 0;
 }
 
 .btn-action {
@@ -131,16 +126,16 @@ header {
     font-weight: bold;
 }
 
-/* --- CHART (FIXED FOR OVERLAP ERROR) --- */
+/* --- CHART (CORREGIDO PARA EVITAR SUPERPOSICIÓN) --- */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 25px;
-    margin-bottom: 50px; /* Espacio para que no choque con lo de abajo */
+    margin-bottom: 50px;
     height: 500px;
     position: relative;
-    clear: both; /* Limpia colisiones de otros elementos */
+    clear: both;
 }
 
 .chart-box {
@@ -187,7 +182,7 @@ header {
     transition: width 0.5s ease;
 }
 
-/* --- ROADMAP (TIMELINE) --- */
+/* --- ROADMAP --- */
 .timeline-section {
     margin-top: 50px;
     padding: 30px;
@@ -226,16 +221,6 @@ header {
     height: 20px;
     background: var(--primary-green);
     border-radius: 50%;
-    box-shadow: 0 0 15px var(--primary-green);
-    z-index: 2;
-}
-
-.timeline-date {
-    font-weight: bold;
-    color: var(--primary-green);
-    font-size: 1rem;
-    margin-bottom: 8px;
-    text-transform: uppercase;
 }
 
 .timeline-content {
@@ -245,7 +230,7 @@ header {
     border: 1px solid var(--border-color);
 }
 
-/* --- STRATEGY PANEL (FIXED BUTTONS ERROR) --- */
+/* --- STRATEGY PANEL (BOTONES GRANDES Y VERDES) --- */
 .strategy-panel {
     display: flex;
     justify-content: center;
@@ -259,11 +244,10 @@ header {
     color: #000 !important;
     border: none !important;
     padding: 15px 30px !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     font-weight: bold !important;
     cursor: pointer !important;
     text-decoration: none !important;
-    display: inline-block !important;
 }
 
 .btn-outline {
@@ -271,21 +255,18 @@ header {
     border: 2px solid var(--text-muted) !important;
     color: var(--text-muted) !important;
     padding: 15px 30px !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     font-weight: bold !important;
     cursor: pointer !important;
-    text-decoration: none !important;
-    display: inline-block !important;
 }
 
 footer {
     text-align: center;
     padding: 20px;
     color: var(--text-muted);
-    font-size: 0.8rem;
 }
 
-/* --- RESPONSIVE (MÓVIL - COMO CLASSROOM) --- */
+/* --- RESPONSIVE DESIGN (PARA EL MÓVIL) --- */
 @media (max-width: 768px) {
     body { padding: 10px; }
 
@@ -300,7 +281,7 @@ footer {
     }
 
     .dashboard-grid {
-        grid-template-columns: 1fr !important; /* Una tarjeta por fila */
+        grid-template-columns: 1fr !important; /* Tarjetas una debajo de otra */
     }
 
     .chart-container-wrapper {
@@ -312,12 +293,10 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .value { font-size: 1.6rem; }
-
     .strategy-panel {
         flex-direction: column;
-        gap: 10px;
-        padding: 0 20px;
+        gap: 15px;
+        padding: 0 10px;
     }
 
     .btn-primary, .btn-outline {
@@ -330,53 +309,13 @@ footer {
     .timeline-dot { left: -30px; }
 }
 
-/* --- PRINT (PDF REPORT) --- */
+/* --- PRINT STYLE --- */
 @media print {
-    body {
+    .config-bar, .strategy-panel, .btn-action, footer { display: none !important; }
+    body { background: white; color: black; }
+    .card, .financial-summary, .chart-container-wrapper {
+        border: 1px solid #000 !important;
         background: white !important;
-        color: black !important;
-        padding: 0;
-        margin: 0;
-    }
-
-    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container {
-        display: none !important;
-    }
-
-    .dashboard-grid {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-    }
-
-    .card {
-        background: white !important;
-        border: 1px solid #ddd !important;
         page-break-inside: avoid;
-    }
-
-    .chart-container-wrapper {
-        display: block !important;
-        background: white !important;
-        border: 1px solid #ccc !important;
-        margin: 30px 0 !important;
-        height: auto !important;
-        min-height: 400px !important;
-        page-break-inside: avoid !important;
-        clear: both !important;
-    }
-
-    .financial-summary {
-        display: block !important;
-        border: 2px solid black !important;
-        background: #f9f9f9 !important;
-        page-break-inside: avoid !important;
-        clear: both !important;
-    }
-
-    .timeline-section {
-        page-break-before: always;
-        background: white !important;
-        border: 1px solid black !important;
     }
 }

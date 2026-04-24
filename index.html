@@ -15,7 +15,9 @@
                 <h1>ITB <span class="green-tech">System</span>Audit</h1>
                 <p>Operational Sustainability Analysis | ASIX Infrastructure</p>
             </div>
-            <div class="status-badge">Audit Mode Active</div>
+            <div class="status-badge">
+                <span class="dot"></span> Audit Mode Active
+            </div>
         </header>
 
         <section class="config-bar">
@@ -48,8 +50,7 @@
             </div>
         </section>
 
-        <main class="dashboard-grid" id="resultsGrid">
-            </main>
+        <main class="dashboard-grid" id="resultsGrid"></main>
 
         <section class="chart-container-wrapper">
             <h2>Energy Trend Projection (2026-2028)</h2>
@@ -63,32 +64,40 @@
             <div class="summary-container">
                 <div class="summary-item">
                     <span class="label">Initial Baseline</span>
-                    <span id="totalBase" class="value">159.138 €</span>
+                    <span id="totalBase" class="value">0€</span>
                 </div>
                 <div class="summary-item">
                     <span class="label">Strategic Target (-30%)</span>
-                    <span id="totalTarget" class="value">111.397 €</span>
+                    <span id="totalTarget" class="value">0€</span>
                 </div>
                 <div class="summary-item highlighted">
                     <span class="label">Current with Policies</span>
-                    <span id="totalCurrent" class="value">159.138 €</span>
+                    <span id="totalCurrent" class="value">0€</span>
                 </div>
             </div>
             <div class="efficiency-container">
                 <div id="efficiencyBar"></div>
             </div>
-            <p id="efficiencyText">0% achieved</p>
+            <p id="efficiencyText" style="font-size: 0.8rem; color: #888; margin-top: 10px; text-align: right;">0% achieved</p>
         </section>
 
         <section class="timeline-section">
-            <h2 class="green-tech">IMPLEMENTATION ROADMAP 2026-2028</h2>
+            <h2 class="green-tech">Implementation Roadmap 2026-2028</h2>
             <div class="timeline">
                 <div class="timeline-item">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-date">2026</div>
+                    <div class="timeline-date">Q1 2026</div>
                     <div class="timeline-content">
                         <h3>Audit & Monitoring</h3>
-                        <p>Installation of measurement agents and analysis of real consumption.</p>
+                        <p>Installation of measurement agents and analysis of real standby consumption.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">Q3 2026</div>
+                    <div class="timeline-content">
+                        <h3>Summer Optimization</h3>
+                        <p>Applying total shutdown policies during inactivity periods (August/September).</p>
                     </div>
                 </div>
                 <div class="timeline-item">
@@ -97,14 +106,6 @@
                     <div class="timeline-content">
                         <h3>Virtual Infrastructure</h3>
                         <p>Mass migration to virtual desktops to reduce per-station consumption.</p>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-date">2028</div>
-                    <div class="timeline-content">
-                        <h3>AI & Predictive Management</h3>
-                        <p>Implementation of AI algorithms for HVAC control and energy waste mitigation.</p>
                     </div>
                 </div>
             </div>
@@ -116,7 +117,7 @@
         </section>
 
         <footer>
-            <p>&copy; 2026 ITB - ASIX Project | Infrastructure Audit</p>
+            <p>&copy; <span id="currentYearDisplay"></span> ITB - ASIX Project | Infrastructure Audit</p>
         </footer>
     </div>
 
