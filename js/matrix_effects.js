@@ -1,9 +1,9 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - 3-YEAR PDF OPTIMIZED
- * - Proyección trienal: 2026, 2027, 2028
- * - Cierre total Agosto/Septiembre (Carga 0)
- * - Desglose de capas apiladas (Stacked)
- * - Optimización de contraste para exportación PDF
+ * ITB INFRASTRUCTURE AUDIT - FULL VERSION
+ * - Proyección trienal 2026-2028
+ * - Cierre total Agosto/Septiembre (Solo Nubulet + Standby)
+ * - 8 Paneles de métricas restaurados
+ * - Optimización de impresión para PDF
  */
 
 const currentSystemYear = 2026;
@@ -38,7 +38,7 @@ let activePolicies = new Set();
 function runCalculations() {
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
     const occupancy = parseInt(document.getElementById('studentCount').value) || 0;
-    let schoolDays = parseInt(document.getElementById('calcMode').value);
+    let schoolDays = parseInt(document.getElementById('calcMode').value) || 0;
     const selectedText = document.getElementById('calcMode').options[document.getElementById('calcMode').selectedIndex].text;
 
     document.getElementById('currentYearDisplay').innerText = currentSystemYear;
@@ -62,25 +62,38 @@ function runCalculations() {
                        (standbyBase * (1 - (energySavingFactor * 0.6))) +
                        infraFixed;
 
+    // Ejecutar renderizado
     updateChart(energySavingFactor);
+    renderCards(currEnergy, baseEnergyTotal, energySavingFactor, standbyBase, infraFixed, savings, occupancy, schoolDays);
 
-    // Actualizar Dashboard
+    // Coste total para el dashboard
     const expM = (schoolDays >= 175) ? 12 : 1;
     const cCurr = (currEnergy * INFRA_DATA.energyPriceKwh) + ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint));
     document.getElementById('totalCurrent').innerText = Math.round(cCurr).toLocaleString() + " €";
-
-    renderCards(currEnergy, baseEnergyTotal, energySavingFactor, standbyBase, infraFixed, savings);
 }
 
-function renderCards(currEnergy, baseEnergyTotal, energySavingFactor, standbyBase, infraFixed, savings) {
+function renderCards(currEnergy, baseEnergyTotal, energySavingFactor, standbyBase, infraFixed, savings, occupancy, schoolDays) {
     const grid = document.getElementById('resultsGrid');
     if (!grid) return;
     grid.innerHTML = "";
 
+    const expM = (schoolDays >= 175) ? 12 : 1;
+
+    // Cálculos de soporte
+    const baseWater = (occupancy * 133 * schoolDays) + (500 * (totalDaysFromMode(schoolDays) - schoolDays));
+    const currWater = Math.max(baseWater * 0.30, baseWater * (1 - savings.water));
+    const cleaningCost = (175 * expM) * (1 - savings.maint);
+    const suppliesCost = (91.25 * expM) * (1 - savings.maint);
+    const wastedEnergy = Math.max(baseEnergyTotal * 0.05, (baseEnergyTotal * 0.25) * (1 - energySavingFactor));
+
     const metrics = [
+        { title: "Facility Water", val: currWater, goal: baseWater * 0.70, unit: "L", icon: "💧" },
         { title: "System Energy Load", val: currEnergy, goal: baseEnergyTotal * 0.75, unit: "kWh", icon: "🖥️" },
-        { title: "Standby Consumption", val: (standbyBase * (1 - (energySavingFactor * 0.6))) + infraFixed, goal: (standbyBase + infraFixed) * 0.6, unit: "kWh", icon: "🌙" },
         { title: "Carbon Footprint", val: currEnergy * CO2_FACTOR, goal: (baseEnergyTotal * 0.75) * CO2_FACTOR, unit: "kg", icon: "🌍" },
+        { title: "Cleaning Costs", val: cleaningCost, goal: (175 * expM) * 0.7, unit: "€", icon: "🛠️" },
+        { title: "Supplies Costs", val: suppliesCost, goal: (91.25 * expM) * 0.7, unit: "€", icon: "📦" },
+        { title: "Standby Consumption", val: (standbyBase * (1 - (energySavingFactor * 0.6))) + infraFixed, goal: (standbyBase + infraFixed) * 0.6, unit: "kWh", icon: "🌙" },
+        { title: "Wasted Energy", val: wastedEnergy, goal: (baseEnergyTotal * 0.08), unit: "kWh", icon: "⚠️" },
         { title: `Next Year Forecast`, val: currEnergy * 1.05, goal: currEnergy, unit: "kWh", icon: "📈" }
     ];
 
@@ -90,11 +103,15 @@ function renderCards(currEnergy, baseEnergyTotal, energySavingFactor, standbyBas
             <div class="card">
                 <h3>${m.icon} ${m.title}</h3>
                 <span class="data">${Math.round(m.val).toLocaleString()}</span><span class="unit">${m.unit}</span>
-                <div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">Target: ${Math.round(m.goal).toLocaleString()}</div>
-                <div class="card-actions">${TECH_POLICIES.filter(p => p.category === m.title).map(btn => `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`).join("")}</div>
+                <div class="target-row" style="color: ${isAchieved ? '#22c55e' : '#e67e22'}">Target: ${Math.round(m.goal).toLocaleString()} ${m.unit}</div>
+                <div class="card-actions">${TECH_POLICIES.filter(p => p.category === m.title).map(btn =>
+                    `<button class="btn-action ${activePolicies.has(btn.id) ? 'active-btn' : ''}" onclick="toggleAction('${btn.id}')">${btn.label}</button>`
+                ).join("")}</div>
             </div>`;
     });
 }
+
+function totalDaysFromMode(days) { return days >= 175 ? 365 : 30; }
 
 function updateChart(appliedSaving) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
@@ -116,13 +133,9 @@ function updateChart(appliedSaving) {
         const mult = Math.pow(growth, yIdx);
         monthlySchoolDays.forEach((sDays, mIdx) => {
             labels.push(`${months[mIdx]} ${year.toString().slice(-2)}`);
-            const i = (CRITICAL_INFRA_WATTAGE * 24 * 30 * mult) / 1000;
-            const s = (pcCount * STANDBY_WATTAGE * 24 * 30 * mult) / 1000;
-            const a = (pcCount * PC_WATTAGE * 12 * sDays * mult) / 1000;
-
-            infraSeries.push(Math.round(i));
-            standbySeries.push(Math.round(s * (1 - (appliedSaving * 0.6))));
-            activeSeries.push(Math.round(a * (1 - appliedSaving)));
+            infraSeries.push(Math.round((CRITICAL_INFRA_WATTAGE * 24 * 30 * mult) / 1000));
+            standbySeries.push(Math.round(((pcCount * STANDBY_WATTAGE * 24 * 30 * mult) / 1000) * (1 - (appliedSaving * 0.6))));
+            activeSeries.push(Math.round(((pcCount * PC_WATTAGE * 12 * sDays * mult) / 1000) * (1 - appliedSaving)));
         });
     });
 
@@ -156,7 +169,7 @@ function toggleAction(id) {
     runCalculations();
 }
 
-// --- OPTIMIZACIÓN PDF ---
+// --- CONFIGURACIÓN PARA PDF ---
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000000';
