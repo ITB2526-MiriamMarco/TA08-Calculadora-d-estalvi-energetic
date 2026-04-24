@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    /* Meta tag crítico para que el responsive funcione en móviles */
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ITB Infrastructure Audit | Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
@@ -41,8 +42,8 @@
                     <option value="20">Mayo </option>
                     <option value="15">Junio </option>
                     <option value="0">Julio </option>
-                    <option value="0">Agosto </option>
-                    <option value="20">Septiembre </option>
+                    <option value="0">Agosto (Cierre)</option>
+                    <option value="0">Septiembre (Cierre)</option>
                     <option value="21">Octubre </option>
                     <option value="19">Noviembre </option>
                     <option value="12">Diciembre </option>
@@ -53,7 +54,7 @@
         <main class="dashboard-grid" id="resultsGrid"></main>
 
         <section class="chart-container-wrapper">
-            <h2>Proyección de Tendencia Energética (Próximos 3 Años)</h2>
+            <h2>Proyección de Tendencia Energética (2026-2028)</h2>
             <div class="chart-box">
                 <canvas id="forecastChart"></canvas>
             </div>
@@ -68,30 +69,66 @@
                 </div>
                 <div class="summary-item">
                     <span class="label">Objetivo Estratégico (-30%)</span>
-                    <span id="totalTarget" class="value goal">0€</span>
+                    <span id="totalTarget" class="value">0€</span>
                 </div>
                 <div class="summary-item highlighted">
                     <span class="label">Actual con Políticas</span>
                     <span id="totalCurrent" class="value">0€</span>
                 </div>
             </div>
-            <div class="efficiency-wrapper" style="margin-top: 20px;">
-                <div class="efficiency-bar-container" style="background: #333; height: 10px; border-radius: 5px; overflow: hidden;">
-                    <div id="efficiencyBar" class="efficiency-bar" style="background: #22c55e; height: 100%; width: 0%; transition: width 0.5s;"></div>
+            <div class="efficiency-container">
+                <div id="efficiencyBar"></div>
+            </div>
+            <p id="efficiencyText" style="font-size: 0.8rem; color: #888; margin-top: 10px; text-align: right;">0% logrado</p>
+        </section>
+
+        <section class="timeline-section">
+            <h2 class="green-tech">Roadmap de Implementación 2026-2028</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">Q1 2026</div>
+                    <div class="timeline-content">
+                        <h3>Auditoría & Monitorización</h3>
+                        <p>Instalación de agentes de medición y análisis de consumo Standby real.</p>
+                    </div>
                 </div>
-                <p id="efficiencyText" style="font-size: 0.8rem; color: #888; margin-top: 5px; text-align: right;">0% logrado</p>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">Q3 2026</div>
+                    <div class="timeline-content">
+                        <h3>Optimización Estival</h3>
+                        <p>Aplicación de políticas de apagado total en periodos de inactividad (Agosto/Septiembre).</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2027</div>
+                    <div class="timeline-content">
+                        <h3>Infraestructura Virtual</h3>
+                        <p>Migración masiva a escritorios virtuales para reducir el consumo por puesto (System Load).</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2028</div>
+                    <div class="timeline-content">
+                        <h3>IA & Gestión Predictiva</h3>
+                        <p>Implementación de algoritmos de IA para el control de climatización y desperdicio energético.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section class="strategy-panel">
             <div class="strategy-buttons">
-                <button class="btn-primary" onclick="resetSavings()">Reiniciar Políticas</button>
-                <button class="btn-outline" onclick="window.print()">Exportar PDF</button>
+                <button class="btn-primary" onclick="activePolicies.clear(); runCalculations();">Reiniciar Políticas</button>
+                <button class="btn-outline" onclick="window.print()">Exportar Informe PDF</button>
             </div>
         </section>
 
         <footer>
-            <p>&copy; <span id="currentYearDisplay"></span> ITB - Proyecto ASIX</p>
+            <p>&copy; <span id="currentYearDisplay"></span> ITB - Proyecto ASIX | Auditoría de Infraestructura</p>
         </footer>
     </div>
 

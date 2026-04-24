@@ -73,10 +73,10 @@ header {
     padding: 10px;
     border-radius: 4px;
     outline: none;
-    font-size: 1rem; /* Evita zoom automático en móviles */
+    font-size: 1rem;
 }
 
-/* Grid de Métricas (8 Tarjetas) */
+/* Grid de Métricas */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -107,11 +107,6 @@ header {
     margin-left: 5px;
 }
 
-.target-row {
-    font-size: 0.8rem;
-    margin-top: 5px;
-}
-
 .btn-action {
     background: transparent;
     border: 1px solid var(--border-color);
@@ -130,7 +125,7 @@ header {
     font-weight: bold;
 }
 
-/* Contenedor de la Gráfica */
+/* Gráfica */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -141,12 +136,9 @@ header {
     position: relative;
 }
 
-.chart-box {
-    height: 100%;
-    width: 100%;
-}
+.chart-box { height: 100%; width: 100%; }
 
-/* Resumen Financiero y Barra de Eficiencia */
+/* Resumen Financiero */
 .financial-summary {
     background: #000;
     border: 2px solid var(--primary-green);
@@ -162,11 +154,7 @@ header {
     text-align: center;
 }
 
-.value {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #fff;
-}
+.value { font-size: 2rem; font-weight: bold; color: #fff; }
 
 .efficiency-container {
     width: 100%;
@@ -183,6 +171,68 @@ header {
     width: 0%;
     transition: width 0.5s ease;
 }
+
+/* --- ACTUALIZACIÓN: CRONOGRAMA (TIMELINE) --- */
+.timeline-section {
+    margin-top: 50px;
+    padding: 30px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.timeline {
+    position: relative;
+    max-width: 850px;
+    margin: 40px auto;
+    padding-left: 50px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -40px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-green);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-green);
+    z-index: 2;
+}
+
+.timeline-date {
+    font-weight: bold;
+    color: var(--primary-green);
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.timeline-content {
+    background: #000;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.timeline-content h3 { color: #fff; margin-bottom: 10px; font-size: 1.2rem; }
+.timeline-content p { color: var(--text-muted); font-size: 0.9rem; }
 
 /* Panel de Estrategia */
 .strategy-panel {
@@ -212,12 +262,7 @@ header {
     cursor: pointer;
 }
 
-footer {
-    text-align: center;
-    padding: 20px;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-}
+footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
 
 /* --- RESPONSIVE (MÓVIL) --- */
 @media (max-width: 768px) {
@@ -225,29 +270,20 @@ footer {
     header { flex-direction: column; text-align: center; gap: 15px; }
     .config-bar { grid-template-columns: 1fr; }
     .chart-container-wrapper { height: 350px; padding: 15px; }
-    .value { font-size: 1.5rem; }
     .strategy-panel { flex-direction: column; gap: 10px; }
     .btn-primary, .btn-outline { width: 100%; }
+    .timeline { padding-left: 30px; }
+    .timeline::before { left: 10px; }
+    .timeline-dot { left: -30px; }
 }
 
-/* --- PDF PRINT OVERWRITE (FIX COLISIONES) --- */
+/* --- PDF PRINT OVERWRITE (FIX COLISIONES & ROADMAP) --- */
 @media print {
-    body {
-        background: white !important;
-        color: black !important;
-        padding: 0;
-        margin: 0;
-    }
-
-    /* Ocultar elementos innecesarios en papel */
-    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container {
-        display: none !important;
-    }
-
+    body { background: white !important; color: black !important; padding: 0; margin: 0; }
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container { display: none !important; }
     header { border-bottom: 2px solid black; margin-bottom: 25px; }
     .green-tech { color: black !important; }
 
-    /* Forzar rejilla de 2 columnas para métricas */
     .dashboard-grid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
@@ -255,48 +291,40 @@ footer {
         margin-bottom: 30px !important;
     }
 
-    .card {
-        background: white !important;
-        border: 1px solid #ddd !important;
-        padding: 10px !important;
-        page-break-inside: avoid;
-    }
+    .card { background: white !important; border: 1px solid #ddd !important; page-break-inside: avoid; }
 
-    /* ARREGLO PARA LA GRÁFICA: Evita que "se coma" el contenido inferior */
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
         border: 1px solid #ccc !important;
         margin: 30px 0 !important;
-        height: auto !important; /* Altura automática para que se estire */
-        min-height: 400px !important;
-        padding: 20px !important;
-        page-break-inside: avoid !important;
-        clear: both !important; /* Limpia el flujo para que lo de abajo espere */
-    }
-
-    canvas {
-        max-width: 100% !important;
         height: auto !important;
+        min-height: 400px !important;
+        page-break-inside: avoid !important;
+        clear: both !important;
     }
 
-    /* ARREGLO PARA EL IMPACTO FINANCIERO: Posicionamiento limpio */
     .financial-summary {
         display: block !important;
         border: 2px solid black !important;
         background: #f9f9f9 !important;
-        margin-top: 40px !important; /* Separación de seguridad */
+        margin-top: 40px !important;
         padding: 20px !important;
         page-break-inside: avoid !important;
         clear: both !important;
-        position: relative !important;
     }
 
-    .summary-container {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-around !important;
+    /* Roadmap en el PDF */
+    .timeline-section {
+        page-break-before: always;
+        background: white !important;
+        border: 1px solid #000 !important;
+        margin-top: 20px;
     }
+    .timeline-content { background: white !important; border: 1px solid #eee !important; }
+    .timeline-content h3, .timeline-content p { color: black !important; }
+    .timeline-dot { background: black !important; box-shadow: none !important; }
+    .timeline::before { background: #000 !important; }
 
     .value { color: black !important; font-size: 1.4rem !important; }
     .data, .unit, .target-row { color: black !important; }
