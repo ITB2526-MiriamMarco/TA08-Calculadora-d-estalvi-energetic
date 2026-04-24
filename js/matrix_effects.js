@@ -1,9 +1,6 @@
 /**
- * ITB INFRASTRUCTURE AUDIT - TOTAL SYSTEM (PDF FIXED)
- * - Proyección trienal: 2026-2028
- * - 8 Paneles de métricas con lógica de ahorro
- * - Barra de eficiencia financiera funcional
- * - Ajuste de Aspect Ratio para evitar colisiones en impresión
+ * ITB INFRASTRUCTURE AUDIT - FINAL SYSTEM
+ * Fixed for PDF printing and English Localization
  */
 
 const currentSystemYear = 2026;
@@ -19,7 +16,7 @@ const INFRA_DATA = {
 const PC_WATTAGE = 200;
 const STANDBY_WATTAGE = 10;
 const CO2_FACTOR = 0.259;
-const CRITICAL_INFRA_WATTAGE = 550; // Nubulet
+const CRITICAL_INFRA_WATTAGE = 550;
 
 const TECH_POLICIES = [
     { id: 'fountains', label: "Shut Fountains (8h)", impact: 0.10, type: 'water', category: "Facility Water" },
@@ -50,7 +47,6 @@ function runCalculations() {
     const totalPeriodDays = (schoolDays >= 175) ? 365 : 30;
     const expM = (schoolDays >= 175) ? 12 : 1;
 
-    // --- 1. CÁLCULOS BASE ---
     const baseStandbyKwh = (pcCount * STANDBY_WATTAGE * 24 * totalPeriodDays) / 1000;
     const baseInfraKwh = (CRITICAL_INFRA_WATTAGE * 24 * totalPeriodDays) / 1000;
     const baseActiveKwh = (pcCount * PC_WATTAGE * 12 * schoolDays) / 1000;
@@ -62,7 +58,6 @@ function runCalculations() {
                           (INFRA_DATA.costs.cleaning * expM) +
                           (INFRA_DATA.costs.supplies * expM);
 
-    // --- 2. CÁLCULOS ACTUALES ---
     let savings = { water: 0, energy: 0, maint: 0 };
     TECH_POLICIES.forEach(p => { if (activePolicies.has(p.id)) savings[p.type] += p.impact; });
 
@@ -78,7 +73,6 @@ function runCalculations() {
                           ((INFRA_DATA.costs.cleaning * expM) * (1 - savings.maint)) +
                           ((INFRA_DATA.costs.supplies * expM) * (1 - savings.maint));
 
-    // --- 3. ACTUALIZAR UI ---
     updateChart(energySavingFactor);
     renderCards(currEnergy, baseEnergyTotal, energySavingFactor, baseStandbyKwh, baseInfraKwh, savings, occupancy, schoolDays, baseWaterL, currWater);
     updateFinancialImpact(costBaseTotal, costCurrTotal);
@@ -133,7 +127,7 @@ function updateFinancialImpact(base, current) {
     const bar = document.getElementById('efficiencyBar');
     const text = document.getElementById('efficiencyText');
     if (bar) bar.style.width = efficiency + "%";
-    if (text) text.innerText = Math.round(efficiency) + "% logrado";
+    if (text) text.innerText = Math.round(efficiency) + "% achieved";
 }
 
 function updateChart(appliedSaving) {
@@ -142,7 +136,7 @@ function updateChart(appliedSaving) {
 
     const pcCount = parseInt(document.getElementById('pcCount').value) || 0;
     const monthlySchoolDays = [20, 18, 15, 21, 20, 15, 15, 0, 0, 21, 19, 12];
-    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     let labels = [];
     let infraSeries = [], standbySeries = [], activeSeries = [];
@@ -165,14 +159,14 @@ function updateChart(appliedSaving) {
         data: {
             labels: labels,
             datasets: [
-                { label: 'Infra Crítica', data: infraSeries, borderColor: '#1e3a8a', backgroundColor: 'rgba(30, 58, 138, 0.8)', fill: true, stack: 'combined', pointRadius: 0 },
+                { label: 'Critical Infra', data: infraSeries, borderColor: '#1e3a8a', backgroundColor: 'rgba(30, 58, 138, 0.8)', fill: true, stack: 'combined', pointRadius: 0 },
                 { label: 'Standby PCs', data: standbySeries, borderColor: '#065f46', backgroundColor: 'rgba(6, 95, 70, 0.7)', fill: true, stack: 'combined', pointRadius: 0 },
-                { label: 'Carga Lectiva', data: activeSeries, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.5)', fill: true, stack: 'combined', pointRadius: 0 }
+                { label: 'Active Load', data: activeSeries, borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.5)', fill: true, stack: 'combined', pointRadius: 0 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // CAMBIO CRÍTICO PARA EL PDF
+            maintainAspectRatio: false, // <-- ESTO ES LO QUE NECESITABAS AÑADIR
             scales: {
                 y: { stacked: true, beginAtZero: true, ticks: { color: '#fff' } },
                 x: { ticks: { color: '#fff', autoSkip: true, maxTicksLimit: 12 } }
@@ -190,7 +184,6 @@ function toggleAction(id) {
     runCalculations();
 }
 
-// --- OPTIMIZACIÓN PDF ---
 window.onbeforeprint = () => {
     if (myChart) {
         myChart.options.scales.x.ticks.color = '#000000';

@@ -1,4 +1,4 @@
-/* --- VARIABLES Y BASES --- */
+/* --- VARIABLES & BASE STYLES --- */
 :root {
     --primary-green: #22c55e;
     --dark-bg: #0a0a0a;
@@ -27,7 +27,7 @@ body {
     margin: 0 auto;
 }
 
-/* --- ESTRUCTURA DASHBOARD --- */
+/* --- HEADER --- */
 header {
     display: flex;
     justify-content: space-between;
@@ -43,7 +43,7 @@ header {
     font-weight: bold;
 }
 
-/* Panel de Configuración Adaptable */
+/* --- CONFIGURATION BAR --- */
 .config-bar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -76,7 +76,7 @@ header {
     font-size: 1rem;
 }
 
-/* Grid de Métricas */
+/* --- METRICS GRID --- */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -125,7 +125,7 @@ header {
     font-weight: bold;
 }
 
-/* Gráfica */
+/* --- CHART CONTAINER --- */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -136,9 +136,12 @@ header {
     position: relative;
 }
 
-.chart-box { height: 100%; width: 100%; }
+.chart-box {
+    height: 100%;
+    width: 100%;
+}
 
-/* Resumen Financiero */
+/* --- FINANCIAL SUMMARY & EFFICIENCY --- */
 .financial-summary {
     background: #000;
     border: 2px solid var(--primary-green);
@@ -154,7 +157,11 @@ header {
     text-align: center;
 }
 
-.value { font-size: 2rem; font-weight: bold; color: #fff; }
+.value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+}
 
 .efficiency-container {
     width: 100%;
@@ -172,7 +179,7 @@ header {
     transition: width 0.5s ease;
 }
 
-/* --- ACTUALIZACIÓN: CRONOGRAMA (TIMELINE) --- */
+/* --- ROADMAP (TIMELINE) --- */
 .timeline-section {
     margin-top: 50px;
     padding: 30px;
@@ -221,7 +228,6 @@ header {
     font-size: 1rem;
     margin-bottom: 8px;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .timeline-content {
@@ -231,10 +237,10 @@ header {
     border: 1px solid var(--border-color);
 }
 
-.timeline-content h3 { color: #fff; margin-bottom: 10px; font-size: 1.2rem; }
+.timeline-content h3 { color: #fff; margin-bottom: 10px; }
 .timeline-content p { color: var(--text-muted); font-size: 0.9rem; }
 
-/* Panel de Estrategia */
+/* --- STRATEGY PANEL --- */
 .strategy-panel {
     display: flex;
     justify-content: center;
@@ -262,14 +268,19 @@ header {
     cursor: pointer;
 }
 
-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
+footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
 
-/* --- RESPONSIVE (MÓVIL) --- */
+/* --- RESPONSIVE (MOBILE) --- */
 @media (max-width: 768px) {
     body { padding: 10px; }
     header { flex-direction: column; text-align: center; gap: 15px; }
     .config-bar { grid-template-columns: 1fr; }
-    .chart-container-wrapper { height: 350px; padding: 15px; }
+    .chart-container-wrapper { height: 350px; }
     .strategy-panel { flex-direction: column; gap: 10px; }
     .btn-primary, .btn-outline { width: 100%; }
     .timeline { padding-left: 30px; }
@@ -277,13 +288,24 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
     .timeline-dot { left: -30px; }
 }
 
-/* --- PDF PRINT OVERWRITE (FIX COLISIONES & ROADMAP) --- */
+/* --- PRINT OVERWRITE (FIXED FOR PDF) --- */
 @media print {
-    body { background: white !important; color: black !important; padding: 0; margin: 0; }
-    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container { display: none !important; }
+    body {
+        background: white !important;
+        color: black !important;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Hide UI elements */
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container {
+        display: none !important;
+    }
+
     header { border-bottom: 2px solid black; margin-bottom: 25px; }
     .green-tech { color: black !important; }
 
+    /* Force 2 columns grid for metrics */
     .dashboard-grid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
@@ -291,8 +313,14 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         margin-bottom: 30px !important;
     }
 
-    .card { background: white !important; border: 1px solid #ddd !important; page-break-inside: avoid; }
+    .card {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        padding: 10px !important;
+        page-break-inside: avoid;
+    }
 
+    /* CHART FIX: Height auto and clear:both prevents overlapping bottom content */
     .chart-container-wrapper {
         display: block !important;
         background: white !important;
@@ -300,10 +328,17 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         margin: 30px 0 !important;
         height: auto !important;
         min-height: 400px !important;
+        padding: 20px !important;
         page-break-inside: avoid !important;
         clear: both !important;
     }
 
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* FINANCIAL SUMMARY PRINT FIX */
     .financial-summary {
         display: block !important;
         border: 2px solid black !important;
@@ -312,19 +347,31 @@ footer { text-align: center; padding: 20px; color: var(--text-muted); font-size:
         padding: 20px !important;
         page-break-inside: avoid !important;
         clear: both !important;
+        position: relative !important;
     }
 
-    /* Roadmap en el PDF */
+    .summary-container {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+    }
+
+    /* ROADMAP PRINT FIX */
     .timeline-section {
-        page-break-before: always;
+        page-break-before: always; /* Start on a new page to avoid clutter */
         background: white !important;
-        border: 1px solid #000 !important;
+        border: 1px solid black !important;
         margin-top: 20px;
     }
-    .timeline-content { background: white !important; border: 1px solid #eee !important; }
-    .timeline-content h3, .timeline-content p { color: black !important; }
+
+    .timeline-content {
+        background: white !important;
+        border: 1px solid #eee !important;
+        color: black !important;
+    }
+
     .timeline-dot { background: black !important; box-shadow: none !important; }
-    .timeline::before { background: #000 !important; }
+    .timeline::before { background: black !important; }
 
     .value { color: black !important; font-size: 1.4rem !important; }
     .data, .unit, .target-row { color: black !important; }
