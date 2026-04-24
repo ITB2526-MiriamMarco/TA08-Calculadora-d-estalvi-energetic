@@ -44,6 +44,11 @@ header {
     font-weight: bold;
 }
 
+.status-badge {
+    font-size: 0.8rem;
+    color: var(--primary-green);
+}
+
 /* --- CONFIGURATION BAR --- */
 .config-bar {
     display: grid;
@@ -80,13 +85,12 @@ header {
 /* --- METRICS GRID --- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 15px;
     margin-bottom: 30px;
     width: 100%;
 }
 
-/* Estilos de las tarjetas que genera el JS */
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -103,9 +107,10 @@ header {
     font-family: monospace;
 }
 
-.target-row {
-    font-size: 0.85rem;
-    margin: 5px 0;
+.unit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: 5px;
 }
 
 .btn-action {
@@ -126,16 +131,16 @@ header {
     font-weight: bold;
 }
 
-/* --- CHART (CORREGIDO PARA EVITAR SUPERPOSICIÓN) --- */
+/* --- CHART (FIXED FOR OVERLAP ERROR) --- */
 .chart-container-wrapper {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 25px;
-    margin-bottom: 50px;
+    margin-bottom: 50px; /* Espacio para que no choque con lo de abajo */
     height: 500px;
     position: relative;
-    clear: both;
+    clear: both; /* Limpia colisiones de otros elementos */
 }
 
 .chart-box {
@@ -182,7 +187,7 @@ header {
     transition: width 0.5s ease;
 }
 
-/* --- ROADMAP --- */
+/* --- ROADMAP (TIMELINE) --- */
 .timeline-section {
     margin-top: 50px;
     padding: 30px;
@@ -221,6 +226,16 @@ header {
     height: 20px;
     background: var(--primary-green);
     border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-green);
+    z-index: 2;
+}
+
+.timeline-date {
+    font-weight: bold;
+    color: var(--primary-green);
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
 }
 
 .timeline-content {
@@ -230,7 +245,7 @@ header {
     border: 1px solid var(--border-color);
 }
 
-/* --- STRATEGY PANEL (BOTONES GRANDES Y VERDES) --- */
+/* --- STRATEGY PANEL (FIXED BUTTONS ERROR) --- */
 .strategy-panel {
     display: flex;
     justify-content: center;
@@ -244,10 +259,11 @@ header {
     color: #000 !important;
     border: none !important;
     padding: 15px 30px !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     font-weight: bold !important;
     cursor: pointer !important;
     text-decoration: none !important;
+    display: inline-block !important;
 }
 
 .btn-outline {
@@ -255,18 +271,21 @@ header {
     border: 2px solid var(--text-muted) !important;
     color: var(--text-muted) !important;
     padding: 15px 30px !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     font-weight: bold !important;
     cursor: pointer !important;
+    text-decoration: none !important;
+    display: inline-block !important;
 }
 
 footer {
     text-align: center;
     padding: 20px;
     color: var(--text-muted);
+    font-size: 0.8rem;
 }
 
-/* --- RESPONSIVE DESIGN (PARA EL MÓVIL) --- */
+/* --- RESPONSIVE (MÓVIL - COMO CLASSROOM) --- */
 @media (max-width: 768px) {
     body { padding: 10px; }
 
@@ -281,7 +300,7 @@ footer {
     }
 
     .dashboard-grid {
-        grid-template-columns: 1fr !important; /* Tarjetas una debajo de otra */
+        grid-template-columns: 1fr !important; /* Una tarjeta por fila */
     }
 
     .chart-container-wrapper {
@@ -293,10 +312,12 @@ footer {
         grid-template-columns: 1fr;
     }
 
+    .value { font-size: 1.6rem; }
+
     .strategy-panel {
         flex-direction: column;
-        gap: 15px;
-        padding: 0 10px;
+        gap: 10px;
+        padding: 0 20px;
     }
 
     .btn-primary, .btn-outline {
@@ -309,13 +330,112 @@ footer {
     .timeline-dot { left: -30px; }
 }
 
-/* --- PRINT STYLE --- */
+/* --- PRINT (PDF REPORT) --- */
 @media print {
-    .config-bar, .strategy-panel, .btn-action, footer { display: none !important; }
-    body { background: white; color: black; }
-    .card, .financial-summary, .chart-container-wrapper {
-        border: 1px solid #000 !important;
+    body {
         background: white !important;
+        color: black !important;
+        padding: 0;
+        margin: 0;
+    }
+
+    .config-bar, .strategy-panel, .btn-action, .card-actions, footer, .efficiency-container {
+        display: none !important;
+    }
+
+    .dashboard-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .card {
+        background: white !important;
+        border: 1px solid #ddd !important;
         page-break-inside: avoid;
+    }
+
+    .chart-container-wrapper {
+        display: block !important;
+        background: white !important;
+        border: 1px solid #ccc !important;
+        margin: 30px 0 !important;
+        height: auto !important;
+        min-height: 400px !important;
+        page-break-inside: avoid !important;
+        clear: both !important;
+    }
+
+    .financial-summary {
+        display: block !important;
+        border: 2px solid black !important;
+        background: #f9f9f9 !important;
+        page-break-inside: avoid !important;
+        clear: both !important;
+    }
+
+    .timeline-section {
+        page-break-before: always;
+        background: white !important;
+        border: 1px solid black !important;
+    }
+}
+/* --- RESPONSIVE ADAPTATION (MOBILE) --- */
+@media (max-width: 768px) {
+    /* Ajustamos el espaciado general */
+    body {
+        padding: 10px;
+    }
+
+    /* El encabezado se apila verticalmente */
+    header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    /* La barra de configuración pasa a una sola columna */
+    .config-bar {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Las tarjetas de métricas se ponen una debajo de otra */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* El contenedor de la gráfica se ajusta para no ser tan alto */
+    .chart-container-wrapper {
+        height: 350px;
+        padding: 10px;
+    }
+
+    /* El resumen financiero se apila */
+    .summary-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Los botones reset y export ocupan todo el ancho para facilitar el clic */
+    .strategy-panel {
+        flex-direction: column;
+        gap: 10px;
+        padding: 0 20px;
+    }
+
+    .btn-primary, .btn-outline {
+        width: 100%;
+        text-align: center;
+        display: block !important; /* Asegura que ocupen toda la línea */
+    }
+
+    /* Ajuste de la línea de tiempo para pantallas estrechas */
+    .timeline {
+        padding-left: 30px;
+    }
+    .timeline::before {
+        left: 10px;
+    }
+    .timeline-dot {
+        left: -30px;
     }
 }
